@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Иврит · Квартира и город</title>
+<!-- Полностью автономно: внешние шрифты не подключаются, чтобы файл работал офлайн и при пересылке -->
+<style>
+  :root{
+    --ink:#0c1a2b;
+    --ink-2:#11233a;
+    --panel:#13263d;
+    --line:rgba(255,255,255,.09);
+    --line-strong:rgba(255,255,255,.16);
+    --amber:#f4b942;
+    --amber-dim:#caa04f;
+    --cyan:#46c8be;
+    --paper:#f3eee0;
+    --muted:#7e93a8;
+    --good:#54c08a;
+    --bad:#e0685f;
+    --shadow:0 18px 40px -22px rgba(0,0,0,.8);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(70,200,190,.10), transparent 60%),
+      radial-gradient(900px 500px at 0% 110%, rgba(244,185,66,.08), transparent 55%),
+      var(--ink);
+    color:var(--paper);
+    min-height:100%;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.4;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:28px 20px 64px}
+
+  /* ---- header / wayfinding sign ---- */
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .pin{
+    width:38px;height:38px;border-radius:50% 50% 50% 2px;
+    background:linear-gradient(160deg,var(--amber),var(--amber-dim));
+    transform:rotate(45deg);position:relative;flex:0 0 auto;
+    box-shadow:0 6px 14px -6px rgba(244,185,66,.7);
+  }
+  .pin::after{content:"";position:absolute;inset:11px;background:var(--ink);border-radius:50%}
+  .brand h1{font-size:20px;font-weight:700;letter-spacing:.2px;transform:translateY(2px)}
+  .brand .sub{font-size:12.5px;color:var(--muted);font-weight:500}
+  .stats{display:flex;gap:18px;font-size:12px;color:var(--muted)}
+  .stats b{display:block;font-size:21px;color:var(--paper);font-weight:700;line-height:1}
+  .stats .cyan{color:var(--cyan)}
+  .stats .amber{color:var(--amber)}
+
+  /* ---- controls ---- */
+  .bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .chip{
+    font:inherit;font-size:13px;font-weight:500;cursor:pointer;
+    background:var(--ink-2);color:var(--muted);border:1px solid var(--line);
+    padding:7px 13px;border-radius:999px;transition:.15s;
+  }
+  .chip:hover{color:var(--paper);border-color:var(--line-strong)}
+  .chip[aria-pressed="true"]{background:var(--amber);color:#1a1206;border-color:var(--amber);font-weight:600}
+  .chip.cat[aria-pressed="true"]{background:var(--cyan);color:#04201d;border-color:var(--cyan)}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 2px;margin-bottom:22px}
+  .modes{display:flex;gap:4px;background:var(--ink-2);padding:4px;border-radius:12px;border:1px solid var(--line)}
+  .modes button{font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;border:0;background:transparent;
+    color:var(--muted);padding:7px 16px;border-radius:9px;transition:.15s}
+  .modes button[aria-pressed="true"]{background:var(--panel);color:var(--paper);box-shadow:var(--shadow)}
+  .dir{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
+  .dir button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--ink-2);color:var(--paper);
+    border-radius:9px;padding:7px 12px;font-size:13px;font-weight:600;transition:.15s}
+  .dir button:hover{border-color:var(--line-strong)}
+
+  /* ---- card / sign ---- */
+  .stage{perspective:1400px}
+  .card{
+    position:relative;width:100%;min-height:300px;cursor:pointer;
+    transform-style:preserve-3d;transition:transform .55s cubic-bezier(.2,.7,.2,1);
+  }
+  .card.flipped{transform:rotateY(180deg)}
+  .face{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;
+    background:linear-gradient(180deg,var(--panel),var(--ink-2));
+    border:1px solid var(--line-strong);box-shadow:var(--shadow);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:34px 26px;text-align:center;overflow:hidden;
+  }
+  .face::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;
+    background:linear-gradient(90deg,var(--amber),var(--cyan))}
+  .face.back{transform:rotateY(180deg)}
+  .corner{position:absolute;top:16px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:600}
+  .corner.l{left:20px}
+  .corner.r{right:20px;color:var(--amber-dim)}
+  .he{font-family:"Frank Ruhl Libre","David Libre","Times New Roman",serif;font-weight:700;font-size:clamp(46px,12vw,78px);
+    line-height:1.05;direction:rtl;unicode-bidi:isolate}
+  .translit{font-size:17px;color:var(--cyan);margin-top:14px;font-weight:500;letter-spacing:.2px}
+  .ru{font-size:clamp(26px,7vw,38px);font-weight:600}
+  .note{font-size:12.5px;color:var(--muted);margin-top:14px;max-width:80%}
+  .hint{position:absolute;bottom:16px;font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px}
+  .nav .count{font-size:13px;color:var(--muted)}
+  .nav .count b{color:var(--paper)}
+  .ghost{font:inherit;cursor:pointer;background:var(--ink-2);border:1px solid var(--line);color:var(--paper);
+    border-radius:11px;padding:11px 20px;font-weight:600;font-size:14px;transition:.15s}
+  .ghost:hover{border-color:var(--line-strong);background:var(--panel)}
+  .ghost:disabled{opacity:.35;cursor:default}
+
+  /* ---- quiz ---- */
+  .quiz{display:none}
+  .prompt{
+    border-radius:20px;background:linear-gradient(180deg,var(--panel),var(--ink-2));
+    border:1px solid var(--line-strong);box-shadow:var(--shadow);position:relative;overflow:hidden;
+    padding:40px 26px;text-align:center;margin-bottom:16px;min-height:190px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .prompt::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;
+    background:linear-gradient(90deg,var(--amber),var(--cyan))}
+  .prompt .ask{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;margin-bottom:14px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .opt{font:inherit;cursor:pointer;text-align:center;border:1px solid var(--line);
+    background:var(--ink-2);color:var(--paper);border-radius:14px;padding:18px 14px;transition:.13s;
+    font-weight:500;min-height:64px;display:flex;align-items:center;justify-content:center}
+  .opt:hover:not(:disabled){border-color:var(--line-strong);transform:translateY(-1px)}
+  .opt.he{font-family:"Frank Ruhl Libre","David Libre","Times New Roman",serif;font-size:30px;font-weight:700;direction:rtl}
+  .opt.ru{font-size:17px}
+  .opt:disabled{cursor:default}
+  .opt.correct{background:rgba(84,192,138,.16);border-color:var(--good);color:#bdf0d4}
+  .opt.wrong{background:rgba(224,104,95,.14);border-color:var(--bad);color:#f3c4c0}
+  .feedback{text-align:center;margin-top:16px;min-height:24px;font-size:14px;font-weight:500;color:var(--muted)}
+  .feedback b{color:var(--cyan)}
+
+  @media(max-width:480px){
+    .opts{grid-template-columns:1fr}
+    .toolbar{flex-direction:column;align-items:stretch}
+    .dir{justify-content:space-between}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .card{transition:none}
+  }
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:6px}
+
+  /* ---- список всех слов ---- */
+  #listView{margin-top:4px}
+  .list-head{display:flex;align-items:baseline;justify-content:space-between;
+    border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:6px}
+  .list-head span:first-child{font-size:13px;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--cyan)}
+  .list-count{font-size:13px;color:var(--muted)}
+  .list-row{display:grid;grid-template-columns:34% 26% 1fr;gap:8px;align-items:center;
+    padding:12px 6px;border-bottom:1px solid var(--line)}
+  .list-row:hover{background:var(--ink-2)}
+  .list-he{font-family:"Frank Ruhl Libre","David Libre","Times New Roman",serif;
+    font-size:26px;font-weight:700;color:var(--paper);direction:rtl;text-align:right}
+  .list-tr{font-size:14px;color:var(--cyan)}
+  .list-ru{font-size:15px;color:var(--paper)}
+  .list-g{font-size:11.5px;color:var(--muted);display:block;margin-top:2px}
+  .list-sep{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--amber-dim);padding:18px 6px 6px;border-bottom:1px solid var(--line-strong)}
+  @media(max-width:480px){
+    .list-row{grid-template-columns:40% 1fr;gap:6px}
+    .list-tr{grid-column:2;font-size:13px}
+    .list-ru{grid-column:1 / -1;color:var(--muted)}
+    .list-he{grid-row:1}
+  }
+
+  /* ---- статический fallback ---- */
+  #fallback{margin-top:34px}
+  .fb-note{font-size:13.5px;color:var(--muted);background:var(--ink-2);border:1px solid var(--line);
+    border-left:3px solid var(--amber);border-radius:10px;padding:12px 14px;margin-bottom:20px;line-height:1.5}
+  .fb-cat{font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--cyan);margin:22px 0 8px;
+    text-transform:uppercase}
+  .fb-tbl{width:100%;border-collapse:collapse}
+  .fb-tbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+  .fb-he{font-family:"Frank Ruhl Libre","David Libre","Times New Roman",serif;font-size:24px;font-weight:700;
+    width:34%;color:var(--paper)}
+  .fb-tr{font-size:14px;color:var(--cyan);width:26%}
+  .fb-ru{font-size:14.5px;color:var(--paper)}
+  .fb-g{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="pin" aria-hidden="true"></div>
+      <div>
+        <h1>Квартира и город</h1>
+        <div class="sub">тренажёр слов на иврите · עברית</div>
+      </div>
+    </div>
+    <div class="stats">
+      <div><b id="stViewed" class="cyan">0</b>просмотрено</div>
+      <div><b id="stTotal">0</b>в колоде</div>
+      <div><b id="stScore" class="amber">0/0</b>тест</div>
+    </div>
+  </header>
+
+  <div class="bar" id="cats"></div>
+
+  <div class="toolbar">
+    <div class="modes" role="tablist" aria-label="Режим">
+      <button id="mFlash" role="tab" aria-pressed="true">Карточки</button>
+      <button id="mQuiz" role="tab" aria-pressed="false">Тест</button>
+      <button id="mList" role="tab" aria-pressed="false">Список</button>
+    </div>
+    <div class="dir">
+      <span>Направление</span>
+      <button id="dirBtn">עברית → рус.</button>
+    </div>
+  </div>
+
+  <!-- FLASHCARDS -->
+  <section id="flashView">
+    <div class="stage">
+      <div class="card" id="card" tabindex="0" role="button" aria-label="Перевернуть карточку">
+        <div class="face front">
+          <span class="corner l" id="fCat"></span>
+          <span class="corner r" id="fGen"></span>
+          <div id="fFront"></div>
+          <div class="hint">нажми, чтобы перевернуть</div>
+        </div>
+        <div class="face back">
+          <span class="corner l" id="bCat"></span>
+          <div id="fBack"></div>
+          <div class="hint">нажми, чтобы перевернуть</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="ghost" id="prevBtn">← Назад</button>
+      <span class="count"><b id="pos">1</b> / <span id="len">0</span></span>
+      <button class="ghost" id="nextBtn">Дальше →</button>
+    </div>
+    <div class="nav" style="margin-top:10px;justify-content:center">
+      <button class="ghost" id="shuffleBtn">Перемешать колоду</button>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quizView" class="quiz">
+    <div class="prompt">
+      <div class="ask" id="qAsk">Выбери перевод</div>
+      <div id="qPrompt"></div>
+    </div>
+    <div class="opts" id="qOpts"></div>
+    <div class="feedback" id="qFeedback"></div>
+    <div class="nav" style="margin-top:8px;justify-content:center">
+      <button class="ghost" id="qNext" disabled>Следующий вопрос →</button>
+    </div>
+  </section>
+
+  <!-- СПИСОК: все слова текущей категории подряд -->
+  <section id="listView" style="display:none">
+    <div class="list-head">
+      <span id="listTitle">Все слова</span>
+      <span id="listCount" class="list-count"></span>
+    </div>
+    <div id="listBox"></div>
+  </section>
+
+
+  <!-- Статический список: виден, даже если в режиме предпросмотра не работает JavaScript.
+       Когда трейнер запускается нормально, этот блок скрывается скриптом. -->
+  <noscript><div class="fb-note">JavaScript отключён. Ниже — все слова. Для карточек и теста открой файл в браузере.</div></noscript>
+  <section id="fallback">
+    <div class="fb-note">Если карточки выше пустые — открой этот файл в браузере (Chrome / Safari), а не в режиме просмотра вложения. А пока — все слова списком:</div>
+<h3 class="fb-cat">Квартира · דירה</h3>
+<table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">דירה</td><td class="fb-tr">дира</td><td class="fb-ru">квартира <span class="fb-g">נ׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חדר</td><td class="fb-tr">хедер</td><td class="fb-ru">комната <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חדרים</td><td class="fb-tr">хадарим</td><td class="fb-ru">комнаты <span class="fb-g">мн.ч.</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מטבח</td><td class="fb-tr">митбах</td><td class="fb-ru">кухня <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מקלחת</td><td class="fb-tr">миклахат</td><td class="fb-ru">душ <span class="fb-g">נ׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">סלון</td><td class="fb-tr">салон</td><td class="fb-ru">гостиная <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מרפסת</td><td class="fb-tr">мирпэсэт</td><td class="fb-ru">балкон <span class="fb-g">נ׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">דלת</td><td class="fb-tr">дэлет</td><td class="fb-ru">дверь <span class="fb-g">נ׳ · мн. דלתות</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חלון</td><td class="fb-tr">халон</td><td class="fb-ru">окно <span class="fb-g">ז׳ · мн. חלונות</span></td></tr>
+<tr><td class="fb-he" dir="rtl">קומה</td><td class="fb-tr">кома</td><td class="fb-ru">этаж <span class="fb-g">נ׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מעלית</td><td class="fb-tr">маалит</td><td class="fb-ru">лифт <span class="fb-g">נ׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מדרגות</td><td class="fb-tr">мадрэгот</td><td class="fb-ru">лестница <span class="fb-g">נ"ר</span></td></tr>
+<tr><td class="fb-he" dir="rtl">גינה</td><td class="fb-tr">гина</td><td class="fb-ru">садик <span class="fb-g">נ׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חדר אוכל</td><td class="fb-tr">хедер охель</td><td class="fb-ru">столовая</td></tr>
+<tr><td class="fb-he" dir="rtl">חדר שינה</td><td class="fb-tr">хедер шина</td><td class="fb-ru">спальня</td></tr>
+<tr><td class="fb-he" dir="rtl">חדר אמבטיה</td><td class="fb-tr">хедер амбатья</td><td class="fb-ru">ванная</td></tr>
+<tr><td class="fb-he" dir="rtl">חדר ילדים</td><td class="fb-tr">хедер еладим</td><td class="fb-ru">детская комната</td></tr>
+<tr><td class="fb-he" dir="rtl">בית פרטי</td><td class="fb-tr">байт прати</td><td class="fb-ru">частный дом</td></tr>
+<tr><td class="fb-he" dir="rtl">בניין</td><td class="fb-tr">бинйян</td><td class="fb-ru">здание, многоквартирный дом</td></tr>
+<tr><td class="fb-he" dir="rtl">בית</td><td class="fb-tr">байт</td><td class="fb-ru">дом <span class="fb-g">ז׳</span></td></tr>
+</table>
+<h3 class="fb-cat">Город · עיר</h3>
+<table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">עיר</td><td class="fb-tr">ир</td><td class="fb-ru">город <span class="fb-g">נ׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מרכז</td><td class="fb-tr">мерказ</td><td class="fb-ru">центр <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אזור</td><td class="fb-tr">эзор</td><td class="fb-ru">район, зона <span class="fb-g">ז׳ · мн. אזורים</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רחוב</td><td class="fb-tr">рехов</td><td class="fb-ru">улица <span class="fb-g">ז׳ · мн. רחובות</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שדרה</td><td class="fb-tr">сдэра</td><td class="fb-ru">бульвар <span class="fb-g">נ׳ · мн. שדרות</span></td></tr>
+<tr><td class="fb-he" dir="rtl">סמטה</td><td class="fb-tr">симта</td><td class="fb-ru">переулок <span class="fb-g">נ׳ · мн. סמטאות</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כיכר</td><td class="fb-tr">кикар</td><td class="fb-ru">площадь <span class="fb-g">נ׳ · мн. כיכרות</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חוף רחצה</td><td class="fb-tr">хоф рахаца</td><td class="fb-ru">пляж <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תחנה</td><td class="fb-tr">тахана</td><td class="fb-ru">остановка, вокзал <span class="fb-g">נ׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תחנת רכבת</td><td class="fb-tr">тахнат ракевет</td><td class="fb-ru">ж/д вокзал</td></tr>
+<tr><td class="fb-he" dir="rtl">תחנת אוטובוס</td><td class="fb-tr">тахнат отобус</td><td class="fb-ru">автобусная остановка</td></tr>
+<tr><td class="fb-he" dir="rtl">בית ספר</td><td class="fb-tr">бэйт сэфер</td><td class="fb-ru">школа <span class="fb-g">ז׳ · мн. בתי ספר</span></td></tr>
+<tr><td class="fb-he" dir="rtl">גן ילדים</td><td class="fb-tr">ган еладим</td><td class="fb-ru">детский сад <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">משטרה</td><td class="fb-tr">миштара</td><td class="fb-ru">полиция <span class="fb-g">נ׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בית חולים</td><td class="fb-tr">бэйт холим</td><td class="fb-ru">больница <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">משרד</td><td class="fb-tr">мисрад</td><td class="fb-ru">офис, учреждение <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">דואר</td><td class="fb-tr">доар</td><td class="fb-ru">почта <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בית כנסת</td><td class="fb-tr">бэйт кнэсэт</td><td class="fb-ru">синагога <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בית מרקחת</td><td class="fb-tr">бэйт миркахат</td><td class="fb-ru">аптека <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">קניון</td><td class="fb-tr">канйон</td><td class="fb-ru">торговый центр <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מקלט</td><td class="fb-tr">миклат</td><td class="fb-ru">бомбоубежище <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ממ"ד</td><td class="fb-tr">мамад</td><td class="fb-ru">бомбоубежище (в квартире)</td></tr>
+<tr><td class="fb-he" dir="rtl">מד"א</td><td class="fb-tr">мада</td><td class="fb-ru">скорая помощь</td></tr>
+</table>
+<h3 class="fb-cat">Предлоги места · מילות יחס</h3>
+<table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">במרכז</td><td class="fb-tr">бэмерказ</td><td class="fb-ru">в центре</td></tr>
+<tr><td class="fb-he" dir="rtl">על</td><td class="fb-tr">аль</td><td class="fb-ru">на</td></tr>
+<tr><td class="fb-he" dir="rtl">מתחת ל</td><td class="fb-tr">митахат лэ</td><td class="fb-ru">под, ниже</td></tr>
+<tr><td class="fb-he" dir="rtl">מעל</td><td class="fb-tr">мэаль</td><td class="fb-ru">над</td></tr>
+<tr><td class="fb-he" dir="rtl">לפני</td><td class="fb-tr">лифней</td><td class="fb-ru">перед</td></tr>
+<tr><td class="fb-he" dir="rtl">מאחורי</td><td class="fb-tr">мэахорей</td><td class="fb-ru">за, позади</td></tr>
+<tr><td class="fb-he" dir="rtl">משמאל ל</td><td class="fb-tr">мисмоль лэ</td><td class="fb-ru">слева от</td></tr>
+<tr><td class="fb-he" dir="rtl">מימין ל</td><td class="fb-tr">мийамин лэ</td><td class="fb-ru">справа от</td></tr>
+<tr><td class="fb-he" dir="rtl">על יד</td><td class="fb-tr">аль яд</td><td class="fb-ru">возле, рядом</td></tr>
+<tr><td class="fb-he" dir="rtl">ליד</td><td class="fb-tr">лияд</td><td class="fb-ru">рядом с</td></tr>
+<tr><td class="fb-he" dir="rtl">מול</td><td class="fb-tr">муль</td><td class="fb-ru">напротив</td></tr>
+<tr><td class="fb-he" dir="rtl">בין</td><td class="fb-tr">бэйн</td><td class="fb-ru">между</td></tr>
+<tr><td class="fb-he" dir="rtl">קרוב ל</td><td class="fb-tr">каров лэ</td><td class="fb-ru">близко к</td></tr>
+<tr><td class="fb-he" dir="rtl">רחוק מ</td><td class="fb-tr">рахок ми</td><td class="fb-ru">далеко от</td></tr>
+<tr><td class="fb-he" dir="rtl">למעלה</td><td class="fb-tr">лемала</td><td class="fb-ru">наверху</td></tr>
+<tr><td class="fb-he" dir="rtl">למטה</td><td class="fb-tr">лемата</td><td class="fb-ru">внизу</td></tr>
+<tr><td class="fb-he" dir="rtl">מסביב</td><td class="fb-tr">месавив</td><td class="fb-ru">вокруг</td></tr>
+<tr><td class="fb-he" dir="rtl">בתוך</td><td class="fb-tr">бэтох</td><td class="fb-ru">внутри</td></tr>
+<tr><td class="fb-he" dir="rtl">בפנים</td><td class="fb-tr">бифним</td><td class="fb-ru">внутри (нар.)</td></tr>
+<tr><td class="fb-he" dir="rtl">בחוץ</td><td class="fb-tr">бахуц</td><td class="fb-ru">снаружи (нар.)</td></tr>
+</table>
+<h3 class="fb-cat">Аренда и покупка · שכירות</h3>
+<table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">לשכור</td><td class="fb-tr">лискор</td><td class="fb-ru">арендовать</td></tr>
+<tr><td class="fb-he" dir="rtl">שכירות</td><td class="fb-tr">схирут</td><td class="fb-ru">аренда</td></tr>
+<tr><td class="fb-he" dir="rtl">למכור</td><td class="fb-tr">лимкор</td><td class="fb-ru">продавать</td></tr>
+<tr><td class="fb-he" dir="rtl">מכירה</td><td class="fb-tr">мхира</td><td class="fb-ru">продажа</td></tr>
+<tr><td class="fb-he" dir="rtl">לקנות</td><td class="fb-tr">ликнот</td><td class="fb-ru">покупать</td></tr>
+<tr><td class="fb-he" dir="rtl">קנייה</td><td class="fb-tr">кния</td><td class="fb-ru">покупка</td></tr>
+<tr><td class="fb-he" dir="rtl">מחיר</td><td class="fb-tr">мэхир</td><td class="fb-ru">цена <span class="fb-g">ז׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כתובת</td><td class="fb-tr">ктовэт</td><td class="fb-ru">адрес <span class="fb-g">נ׳</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מידע</td><td class="fb-tr">мэда</td><td class="fb-ru">информация <span class="fb-g">ז׳</span></td></tr>
+</table>
+<h3 class="fb-cat">Прилагательные · שמות תואר</h3>
+<table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">גדול, גדולה</td><td class="fb-tr">гадоль, гдола</td><td class="fb-ru">большой / ая</td></tr>
+<tr><td class="fb-he" dir="rtl">קטן, קטנה</td><td class="fb-tr">катан, ктана</td><td class="fb-ru">маленький / ая</td></tr>
+<tr><td class="fb-he" dir="rtl">חדש, חדשה</td><td class="fb-tr">хадаш, хадаша</td><td class="fb-ru">новый / ая</td></tr>
+<tr><td class="fb-he" dir="rtl">ישן, ישנה</td><td class="fb-tr">яшан, йешана</td><td class="fb-ru">старый / ая, старинный</td></tr>
+<tr><td class="fb-he" dir="rtl">עתיק, עתיקה</td><td class="fb-tr">атик, атика</td><td class="fb-ru">древний / яя</td></tr>
+<tr><td class="fb-he" dir="rtl">טוב, טובה</td><td class="fb-tr">тов, това</td><td class="fb-ru">хороший / ая</td></tr>
+<tr><td class="fb-he" dir="rtl">יפה, יפה</td><td class="fb-tr">яфэ, яфа</td><td class="fb-ru">красивый / ая</td></tr>
+<tr><td class="fb-he" dir="rtl">נחמד, נחמדה</td><td class="fb-tr">нэхмад, нэхмада</td><td class="fb-ru">приятный / ая</td></tr>
+<tr><td class="fb-he" dir="rtl">מיוחד, מיוחדת</td><td class="fb-tr">меюхад, меюхедет</td><td class="fb-ru">специальный, особенный</td></tr>
+<tr><td class="fb-he" dir="rtl">מצוין, מצוינת</td><td class="fb-tr">мецуян, мецуенет</td><td class="fb-ru">отличный / ая</td></tr>
+</table>
+  </section>
+
+</div>
+
+<script>
+/* ---------- словарь (из файла «квартира_город») ---------- */
+const WORDS = [
+  // КВАРТИРА
+  {he:"דירה",tr:"дира",ru:"квартира",cat:"Квартира",g:"נ׳"},
+  {he:"חדר",tr:"хедер",ru:"комната",cat:"Квартира",g:"ז׳"},
+  {he:"חדרים",tr:"хадарим",ru:"комнаты",cat:"Квартира",g:"мн.ч."},
+  {he:"מטבח",tr:"митбах",ru:"кухня",cat:"Квартира",g:"ז׳"},
+  {he:"מקלחת",tr:"миклахат",ru:"душ",cat:"Квартира",g:"נ׳"},
+  {he:"סלון",tr:"салон",ru:"гостиная",cat:"Квартира",g:"ז׳"},
+  {he:"מרפסת",tr:"мирпэсэт",ru:"балкон",cat:"Квартира",g:"נ׳"},
+  {he:"דלת",tr:"дэлет",ru:"дверь",cat:"Квартира",g:"נ׳ · мн. דלתות"},
+  {he:"חלון",tr:"халон",ru:"окно",cat:"Квартира",g:"ז׳ · мн. חלונות"},
+  {he:"קומה",tr:"кома",ru:"этаж",cat:"Квартира",g:"נ׳"},
+  {he:"מעלית",tr:"маалит",ru:"лифт",cat:"Квартира",g:"נ׳"},
+  {he:"מדרגות",tr:"мадрэгот",ru:"лестница",cat:"Квартира",g:"נ\"ר"},
+  {he:"גינה",tr:"гина",ru:"садик",cat:"Квартира",g:"נ׳"},
+  {he:"חדר אוכל",tr:"хедер охель",ru:"столовая",cat:"Квартира"},
+  {he:"חדר שינה",tr:"хедер шина",ru:"спальня",cat:"Квартира"},
+  {he:"חדר אמבטיה",tr:"хедер амбатья",ru:"ванная",cat:"Квартира"},
+  {he:"חדר ילדים",tr:"хедер еладим",ru:"детская комната",cat:"Квартира"},
+  {he:"בית פרטי",tr:"байт прати",ru:"частный дом",cat:"Квартира"},
+  {he:"בניין",tr:"бинйян",ru:"здание, многоквартирный дом",cat:"Квартира"},
+  {he:"בית",tr:"байт",ru:"дом",cat:"Квартира",g:"ז׳"},
+
+  // ГОРОД
+  {he:"עיר",tr:"ир",ru:"город",cat:"Город",g:"נ׳"},
+  {he:"מרכז",tr:"мерказ",ru:"центр",cat:"Город",g:"ז׳"},
+  {he:"אזור",tr:"эзор",ru:"район, зона",cat:"Город",g:"ז׳ · мн. אזורים"},
+  {he:"רחוב",tr:"рехов",ru:"улица",cat:"Город",g:"ז׳ · мн. רחובות"},
+  {he:"שדרה",tr:"сдэра",ru:"бульвар",cat:"Город",g:"נ׳ · мн. שדרות"},
+  {he:"סמטה",tr:"симта",ru:"переулок",cat:"Город",g:"נ׳ · мн. סמטאות"},
+  {he:"כיכר",tr:"кикар",ru:"площадь",cat:"Город",g:"נ׳ · мн. כיכרות"},
+  {he:"חוף רחצה",tr:"хоф рахаца",ru:"пляж",cat:"Город",g:"ז׳"},
+  {he:"תחנה",tr:"тахана",ru:"остановка, вокзал",cat:"Город",g:"נ׳"},
+  {he:"תחנת רכבת",tr:"тахнат ракевет",ru:"ж/д вокзал",cat:"Город"},
+  {he:"תחנת אוטובוס",tr:"тахнат отобус",ru:"автобусная остановка",cat:"Город"},
+  {he:"בית ספר",tr:"бэйт сэфер",ru:"школа",cat:"Город",g:"ז׳ · мн. בתי ספר"},
+  {he:"גן ילדים",tr:"ган еладим",ru:"детский сад",cat:"Город",g:"ז׳"},
+  {he:"משטרה",tr:"миштара",ru:"полиция",cat:"Город",g:"נ׳"},
+  {he:"בית חולים",tr:"бэйт холим",ru:"больница",cat:"Город",g:"ז׳"},
+  {he:"משרד",tr:"мисрад",ru:"офис, учреждение",cat:"Город",g:"ז׳"},
+  {he:"דואר",tr:"доар",ru:"почта",cat:"Город",g:"ז׳"},
+  {he:"בית כנסת",tr:"бэйт кнэсэт",ru:"синагога",cat:"Город",g:"ז׳"},
+  {he:"בית מרקחת",tr:"бэйт миркахат",ru:"аптека",cat:"Город",g:"ז׳"},
+  {he:"קניון",tr:"канйон",ru:"торговый центр",cat:"Город",g:"ז׳"},
+  {he:"מקלט",tr:"миклат",ru:"бомбоубежище",cat:"Город",g:"ז׳"},
+  {he:"ממ\"ד",tr:"мамад",ru:"бомбоубежище (в квартире)",cat:"Город"},
+  {he:"מד\"א",tr:"мада",ru:"скорая помощь",cat:"Город"},
+
+  // ПРЕДЛОГИ
+  {he:"במרכז",tr:"бэмерказ",ru:"в центре",cat:"Предлоги"},
+  {he:"על",tr:"аль",ru:"на",cat:"Предлоги"},
+  {he:"מתחת ל",tr:"митахат лэ",ru:"под, ниже",cat:"Предлоги"},
+  {he:"מעל",tr:"мэаль",ru:"над",cat:"Предлоги"},
+  {he:"לפני",tr:"лифней",ru:"перед",cat:"Предлоги"},
+  {he:"מאחורי",tr:"мэахорей",ru:"за, позади",cat:"Предлоги"},
+  {he:"משמאל ל",tr:"мисмоль лэ",ru:"слева от",cat:"Предлоги"},
+  {he:"מימין ל",tr:"мийамин лэ",ru:"справа от",cat:"Предлоги"},
+  {he:"על יד",tr:"аль яд",ru:"возле, рядом",cat:"Предлоги"},
+  {he:"ליד",tr:"лияд",ru:"рядом с",cat:"Предлоги"},
+  {he:"מול",tr:"муль",ru:"напротив",cat:"Предлоги"},
+  {he:"בין",tr:"бэйн",ru:"между",cat:"Предлоги"},
+  {he:"קרוב ל",tr:"каров лэ",ru:"близко к",cat:"Предлоги"},
+  {he:"רחוק מ",tr:"рахок ми",ru:"далеко от",cat:"Предлоги"},
+  {he:"למעלה",tr:"лемала",ru:"наверху",cat:"Предлоги"},
+  {he:"למטה",tr:"лемата",ru:"внизу",cat:"Предлоги"},
+  {he:"מסביב",tr:"месавив",ru:"вокруг",cat:"Предлоги"},
+  {he:"בתוך",tr:"бэтох",ru:"внутри",cat:"Предлоги"},
+  {he:"בפנים",tr:"бифним",ru:"внутри (нар.)",cat:"Предлоги"},
+  {he:"בחוץ",tr:"бахуц",ru:"снаружи (нар.)",cat:"Предлоги"},
+
+  // АРЕНДА / ПОКУПКА
+  {he:"לשכור",tr:"лискор",ru:"арендовать",cat:"Аренда"},
+  {he:"שכירות",tr:"схирут",ru:"аренда",cat:"Аренда"},
+  {he:"למכור",tr:"лимкор",ru:"продавать",cat:"Аренда"},
+  {he:"מכירה",tr:"мхира",ru:"продажа",cat:"Аренда"},
+  {he:"לקנות",tr:"ликнот",ru:"покупать",cat:"Аренда"},
+  {he:"קנייה",tr:"кния",ru:"покупка",cat:"Аренда"},
+  {he:"מחיר",tr:"мэхир",ru:"цена",cat:"Аренда",g:"ז׳"},
+  {he:"כתובת",tr:"ктовэт",ru:"адрес",cat:"Аренда",g:"נ׳"},
+  {he:"מידע",tr:"мэда",ru:"информация",cat:"Аренда",g:"ז׳"},
+
+  // ПРИЛАГАТЕЛЬНЫЕ (м.р., ж.р.)
+  {he:"גדול, גדולה",tr:"гадоль, гдола",ru:"большой / ая",cat:"Прилагательные"},
+  {he:"קטן, קטנה",tr:"катан, ктана",ru:"маленький / ая",cat:"Прилагательные"},
+  {he:"חדש, חדשה",tr:"хадаш, хадаша",ru:"новый / ая",cat:"Прилагательные"},
+  {he:"ישן, ישנה",tr:"яшан, йешана",ru:"старый / ая, старинный",cat:"Прилагательные"},
+  {he:"עתיק, עתיקה",tr:"атик, атика",ru:"древний / яя",cat:"Прилагательные"},
+  {he:"טוב, טובה",tr:"тов, това",ru:"хороший / ая",cat:"Прилагательные"},
+  {he:"יפה, יפה",tr:"яфэ, яфа",ru:"красивый / ая",cat:"Прилагательные"},
+  {he:"נחמד, נחמדה",tr:"нэхмад, нэхмада",ru:"приятный / ая",cat:"Прилагательные"},
+  {he:"מיוחד, מיוחדת",tr:"меюхад, меюхедет",ru:"специальный, особенный",cat:"Прилагательные"},
+  {he:"מצוין, מצוינת",tr:"мецуян, мецуенет",ru:"отличный / ая",cat:"Прилагательные"},
+];
+
+/* ---------- состояние ---------- */
+const CATS = ["Все","Квартира","Город","Предлоги","Аренда","Прилагательные"];
+let activeCat = "Все";
+let mode = "flash";           // flash | quiz
+let heToRu = true;            // направление
+let deck = [];
+let idx = 0;
+let viewed = new Set();
+let score = {right:0, total:0};
+let quizCur = null, quizAnswered = false;
+
+const $ = id => document.getElementById(id);
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+function buildDeck(){
+  const pool = activeCat==="Все" ? WORDS : WORDS.filter(w=>w.cat===activeCat);
+  deck = shuffle(pool);
+  idx = 0;
+  $("stTotal").textContent = deck.length;
+  $("len").textContent = deck.length;
+}
+
+/* ---------- категории ---------- */
+function renderCats(){
+  const box = $("cats");
+  box.innerHTML = "";
+  CATS.forEach(c=>{
+    const b = document.createElement("button");
+    b.className = "chip cat";
+    b.textContent = c;
+    b.setAttribute("aria-pressed", c===activeCat);
+    b.onclick = ()=>{ activeCat=c; renderCats(); buildDeck(); viewed.clear(); updateStats();
+      if(mode==="flash") render(); else if(mode==="quiz") newQuestion(); else renderList(); };
+    box.appendChild(b);
+  });
+}
+
+/* ---------- карточки ---------- */
+function render(){
+  if(mode!=="flash") return;
+  const w = deck[idx];
+  if(!w) return;
+  const card = $("card");
+  card.classList.remove("flipped");
+  const front = heToRu
+    ? `<div class="he" dir="rtl">${w.he}</div>`
+    : `<div class="ru">${w.ru}</div>`;
+  const back = heToRu
+    ? `<div class="ru">${w.ru}</div><div class="translit">${w.tr}</div>`
+    : `<div class="he" dir="rtl">${w.he}</div><div class="translit">${w.tr}</div>`;
+  $("fFront").innerHTML = front;
+  $("fBack").innerHTML = back;
+  $("fCat").textContent = w.cat;
+  $("bCat").textContent = w.cat;
+  $("fGen").textContent = w.g || "";
+  $("pos").textContent = idx+1;
+  viewed.add(w.he);
+  updateStats();
+}
+function flip(){ $("card").classList.toggle("flipped"); }
+function next(){ if(idx<deck.length-1){idx++; render();} }
+function prev(){ if(idx>0){idx--; render();} }
+
+/* ---------- тест ---------- */
+function newQuestion(){
+  quizAnswered = false;
+  $("qFeedback").innerHTML = "";
+  $("qNext").disabled = true;
+  const correct = deck[Math.random()*deck.length|0];
+  quizCur = correct;
+  const pool = (activeCat==="Все"?WORDS:WORDS.filter(w=>w.cat===activeCat));
+  const distract = shuffle(pool.filter(w=>w.ru!==correct.ru)).slice(0,3);
+  const options = shuffle([correct, ...distract]);
+
+  $("qAsk").textContent = heToRu ? "Что это значит?" : "Как это на иврите?";
+  $("qPrompt").innerHTML = heToRu
+    ? `<div class="he" dir="rtl">${correct.he}</div><div class="translit">${correct.tr}</div>`
+    : `<div class="ru" style="font-size:clamp(28px,8vw,40px)">${correct.ru}</div>`;
+
+  const box = $("qOpts");
+  box.innerHTML = "";
+  options.forEach(o=>{
+    const b = document.createElement("button");
+    b.className = "opt " + (heToRu ? "ru" : "he");
+    if(!heToRu) b.dir = "rtl";
+    b.innerHTML = heToRu ? o.ru : o.he;
+    b.onclick = ()=>answer(b, o, correct);
+    box.appendChild(b);
+  });
+}
+function answer(btn, chosen, correct){
+  if(quizAnswered) return;
+  quizAnswered = true;
+  score.total++;
+  const buttons = [...$("qOpts").children];
+  const isRight = chosen.ru===correct.ru;
+  if(isRight) score.right++;
+  buttons.forEach(b=>{
+    b.disabled = true;
+    const label = heToRu ? b.textContent : b.textContent;
+    const matchCorrect = heToRu ? (b.textContent===correct.ru) : (b.textContent===correct.he);
+    if(matchCorrect) b.classList.add("correct");
+  });
+  if(!isRight) btn.classList.add("wrong");
+  $("qFeedback").innerHTML = isRight
+    ? `Верно · <b>${correct.he}</b> — ${correct.tr}`
+    : `Правильно: <b>${correct.he}</b> — ${correct.tr} (${correct.ru})`;
+  $("qNext").disabled = false;
+  updateStats();
+}
+
+/* ---------- общее ---------- */
+function updateStats(){
+  $("stViewed").textContent = viewed.size;
+  $("stScore").textContent = `${score.right}/${score.total}`;
+}
+function setMode(m){
+  mode = m;
+  $("mFlash").setAttribute("aria-pressed", m==="flash");
+  $("mQuiz").setAttribute("aria-pressed", m==="quiz");
+  $("mList").setAttribute("aria-pressed", m==="list");
+  $("flashView").style.display = m==="flash" ? "" : "none";
+  $("quizView").style.display = m==="quiz" ? "block" : "none";
+  $("listView").style.display = m==="list" ? "block" : "none";
+  if(m==="flash") render();
+  else if(m==="quiz") newQuestion();
+  else renderList();
+}
+function renderList(){
+  const pool = activeCat==="Все" ? WORDS : WORDS.filter(w=>w.cat===activeCat);
+  $("listTitle").textContent = activeCat==="Все" ? "Все слова" : activeCat;
+  $("listCount").textContent = pool.length + " слов";
+  const box = $("listBox");
+  box.innerHTML = "";
+  let lastCat = null;
+  pool.forEach(w=>{
+    if(activeCat==="Все" && w.cat!==lastCat){
+      lastCat = w.cat;
+      const sep = document.createElement("div");
+      sep.className = "list-sep";
+      sep.textContent = w.cat;
+      box.appendChild(sep);
+    }
+    const row = document.createElement("div");
+    row.className = "list-row";
+    const g = w.g ? `<span class="list-g">${w.g}</span>` : "";
+    row.innerHTML =
+      `<div class="list-he" dir="rtl">${w.he}</div>`+
+      `<div class="list-tr">${w.tr}</div>`+
+      `<div class="list-ru">${w.ru}${g}</div>`;
+    box.appendChild(row);
+  });
+}
+function toggleDir(){
+  heToRu = !heToRu;
+  $("dirBtn").textContent = heToRu ? "עברית → рус." : "рус. → עברית";
+  if(mode==="flash") render(); else if(mode==="quiz") newQuestion();
+}
+
+/* ---------- события ---------- */
+$("card").onclick = flip;
+$("card").onkeydown = e=>{ if(e.key===" "||e.key==="Enter"){e.preventDefault();flip();} };
+$("nextBtn").onclick = next;
+$("prevBtn").onclick = prev;
+$("shuffleBtn").onclick = ()=>{ buildDeck(); render(); };
+$("mFlash").onclick = ()=>setMode("flash");
+$("mQuiz").onclick = ()=>setMode("quiz");
+$("mList").onclick = ()=>setMode("list");
+$("dirBtn").onclick = toggleDir;
+$("qNext").onclick = newQuestion;
+document.addEventListener("keydown", e=>{
+  if(mode!=="flash") return;
+  if(e.key==="ArrowRight") next();
+  if(e.key==="ArrowLeft") prev();
+});
+
+/* ---------- старт ---------- */
+renderCats();
+buildDeck();
+setMode("flash");
+
+/* трейнер запустился — статический список больше не нужен */
+var _fb=document.getElementById("fallback"); if(_fb) _fb.style.display="none";
+
+</script>
+</body>
+</html>
