@@ -182,8 +182,29 @@
   .fb-tr{font-size:14px;color:var(--cyan);width:26%}
   .fb-ru{font-size:14.5px;color:var(--paper)}
   .fb-g{font-size:12px;color:var(--muted)}
+
+  /* ---- разделы / уроки / поиск ---- */
+  .sections{display:flex;gap:4px;background:var(--ink-2);padding:4px;border-radius:12px;border:1px solid var(--line);margin-bottom:14px}
+  .sections button{flex:1;font:inherit;font-size:14px;font-weight:600;cursor:pointer;border:0;background:transparent;color:var(--muted);padding:9px 10px;border-radius:9px;transition:.15s}
+  .sections button[aria-pressed="true"]{background:var(--panel);color:var(--paper);box-shadow:var(--shadow)}
+  .selrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .selrow label{display:flex;flex-direction:column;gap:5px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;flex:1;min-width:150px}
+  select{font:inherit;font-size:14px;font-weight:500;color:var(--paper);background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+  select:hover{border-color:var(--line-strong)}
+  .search-wrap{position:relative;margin-bottom:14px}
+  #searchInput{width:100%;font:inherit;font-size:16px;color:var(--paper);background:var(--ink-2);border:1px solid var(--line-strong);border-radius:12px;padding:14px 16px}
+  #searchInput::placeholder{color:var(--muted)}
+  #searchInput:focus{outline:none;border-color:var(--cyan)}
+  .src-tag{font-size:11px;font-weight:600;color:var(--amber-dim);white-space:nowrap}
+  .list-row .src-tag{justify-self:end}
+  #searchView .list-row{grid-template-columns:30% 22% 1fr auto}
+  .empty{color:var(--muted);font-size:14px;padding:20px 6px}
+  @media(max-width:480px){
+    #searchView .list-row{grid-template-columns:42% 1fr}
+    #searchView .src-tag{grid-column:1 / -1;justify-self:start;color:var(--muted)}
+  }
 </style>
-</head>
+
 <body>
 <div class="wrap">
 
@@ -191,8 +212,8 @@
     <div class="brand">
       <div class="pin" aria-hidden="true"></div>
       <div>
-        <h1>Квартира и город</h1>
-        <div class="sub">тренажёр слов на иврите · עברית</div>
+        <h1>Иврит · тренажёр</h1>
+        <div class="sub">квартира, город и уроки · עברית</div>
       </div>
     </div>
     <div class="stats">
@@ -202,9 +223,65 @@
     </div>
   </header>
 
-  <div class="bar" id="cats"></div>
+  <div class="sections" role="tablist" aria-label="Раздел">
+    <button id="secTheme" role="tab" aria-pressed="true">Тема</button>
+    <button id="secLessons" role="tab" aria-pressed="false">Уроки</button>
+    <button id="secSearch" role="tab" aria-pressed="false">Поиск</button>
+  </div>
 
-  <div class="toolbar">
+  <!-- THEME controls -->
+  <div id="themeCtrl">
+    <div class="bar" id="cats"></div>
+  </div>
+
+  <!-- LESSONS controls -->
+  <div id="lessonCtrl" style="display:none">
+    <div class="selrow">
+      <label>Урок
+        <select id="lessonSel">
+          <option value="all">Все уроки</option>
+          <option value="1">Урок 1</option>
+          <option value="2">Урок 2</option>
+          <option value="3">Урок 3</option>
+          <option value="4">Урок 4</option>
+          <option value="5">Урок 5</option>
+          <option value="6">Урок 6</option>
+          <option value="7">Урок 7</option>
+          <option value="8">Урок 8</option>
+          <option value="9">Урок 9</option>
+          <option value="10">Урок 10</option>
+          <option value="11">Урок 11</option>
+          <option value="12">Урок 12</option>
+          <option value="13">Урок 13</option>
+        </select>
+      </label>
+      <label>Категория
+        <select id="lessonCat">
+          <option value="Все">Все</option>
+          <option value="Существительные">Существительные</option>
+          <option value="Глаголы">Глаголы</option>
+          <option value="Прилагательные">Прилагательные</option>
+          <option value="Местоимения">Местоимения</option>
+          <option value="Вопросительные">Вопросительные</option>
+          <option value="Числительные">Числительные</option>
+          <option value="Служебные">Служебные</option>
+          <option value="Разное">Разное</option>
+          <option value="География">География</option>
+          <option value="Дни недели">Дни недели</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- SEARCH controls -->
+  <div id="searchCtrl" style="display:none">
+    <div class="search-wrap">
+      <input id="searchInput" type="text" placeholder="Поиск по всем словам: иврит, транскрипция или перевод…" autocomplete="off">
+    </div>
+  </div>
+
+  <!-- mode + direction (theme & lessons) -->
+  <div class="toolbar" id="studyBar">
     <div class="modes" role="tablist" aria-label="Режим">
       <button id="mFlash" role="tab" aria-pressed="true">Карточки</button>
       <button id="mQuiz" role="tab" aria-pressed="false">Тест</button>
@@ -256,7 +333,7 @@
     </div>
   </section>
 
-  <!-- СПИСОК: все слова текущей категории подряд -->
+  <!-- LIST -->
   <section id="listView" style="display:none">
     <div class="list-head">
       <span id="listTitle">Все слова</span>
@@ -265,14 +342,20 @@
     <div id="listBox"></div>
   </section>
 
+  <!-- SEARCH results -->
+  <section id="searchView" style="display:none">
+    <div class="list-head">
+      <span>Результаты</span>
+      <span id="searchCount" class="list-count"></span>
+    </div>
+    <div id="searchBox"></div>
+  </section>
 
-  <!-- Статический список: виден, даже если в режиме предпросмотра не работает JavaScript.
-       Когда трейнер запускается нормально, этот блок скрывается скриптом. -->
-  <noscript><div class="fb-note">JavaScript отключён. Ниже — все слова. Для карточек и теста открой файл в браузере.</div></noscript>
+  <!-- static fallback (no-JS) -->
+  <noscript><div class="fb-note">JavaScript отключён. Ниже — все слова. Для карточек, теста и поиска открой файл в браузере.</div></noscript>
   <section id="fallback">
-    <div class="fb-note">Если карточки выше пустые — открой этот файл в браузере (Chrome / Safari), а не в режиме просмотра вложения. А пока — все слова списком:</div>
-<h3 class="fb-cat">Квартира · דירה</h3>
-<table class="fb-tbl">
+<div class="fb-note">Если карточки не работают — открой файл в браузере (Chrome / Safari), а не в режиме просмотра вложения. Ниже — все слова списком.</div>
+<h3 class="fb-cat">Тема · Квартира</h3><table class="fb-tbl">
 <tr><td class="fb-he" dir="rtl">דירה</td><td class="fb-tr">дира</td><td class="fb-ru">квартира <span class="fb-g">נ׳</span></td></tr>
 <tr><td class="fb-he" dir="rtl">חדר</td><td class="fb-tr">хедер</td><td class="fb-ru">комната <span class="fb-g">ז׳</span></td></tr>
 <tr><td class="fb-he" dir="rtl">חדרים</td><td class="fb-tr">хадарим</td><td class="fb-ru">комнаты <span class="fb-g">мн.ч.</span></td></tr>
@@ -294,8 +377,7 @@
 <tr><td class="fb-he" dir="rtl">בניין</td><td class="fb-tr">бинйян</td><td class="fb-ru">здание, многоквартирный дом</td></tr>
 <tr><td class="fb-he" dir="rtl">בית</td><td class="fb-tr">байт</td><td class="fb-ru">дом <span class="fb-g">ז׳</span></td></tr>
 </table>
-<h3 class="fb-cat">Город · עיר</h3>
-<table class="fb-tbl">
+<h3 class="fb-cat">Тема · Город</h3><table class="fb-tbl">
 <tr><td class="fb-he" dir="rtl">עיר</td><td class="fb-tr">ир</td><td class="fb-ru">город <span class="fb-g">נ׳</span></td></tr>
 <tr><td class="fb-he" dir="rtl">מרכז</td><td class="fb-tr">мерказ</td><td class="fb-ru">центр <span class="fb-g">ז׳</span></td></tr>
 <tr><td class="fb-he" dir="rtl">אזור</td><td class="fb-tr">эзор</td><td class="fb-ru">район, зона <span class="fb-g">ז׳ · мн. אזורים</span></td></tr>
@@ -320,8 +402,7 @@
 <tr><td class="fb-he" dir="rtl">ממ"ד</td><td class="fb-tr">мамад</td><td class="fb-ru">бомбоубежище (в квартире)</td></tr>
 <tr><td class="fb-he" dir="rtl">מד"א</td><td class="fb-tr">мада</td><td class="fb-ru">скорая помощь</td></tr>
 </table>
-<h3 class="fb-cat">Предлоги места · מילות יחס</h3>
-<table class="fb-tbl">
+<h3 class="fb-cat">Тема · Предлоги места</h3><table class="fb-tbl">
 <tr><td class="fb-he" dir="rtl">במרכז</td><td class="fb-tr">бэмерказ</td><td class="fb-ru">в центре</td></tr>
 <tr><td class="fb-he" dir="rtl">על</td><td class="fb-tr">аль</td><td class="fb-ru">на</td></tr>
 <tr><td class="fb-he" dir="rtl">מתחת ל</td><td class="fb-tr">митахат лэ</td><td class="fb-ru">под, ниже</td></tr>
@@ -343,8 +424,7 @@
 <tr><td class="fb-he" dir="rtl">בפנים</td><td class="fb-tr">бифним</td><td class="fb-ru">внутри (нар.)</td></tr>
 <tr><td class="fb-he" dir="rtl">בחוץ</td><td class="fb-tr">бахуц</td><td class="fb-ru">снаружи (нар.)</td></tr>
 </table>
-<h3 class="fb-cat">Аренда и покупка · שכירות</h3>
-<table class="fb-tbl">
+<h3 class="fb-cat">Тема · Аренда и покупка</h3><table class="fb-tbl">
 <tr><td class="fb-he" dir="rtl">לשכור</td><td class="fb-tr">лискор</td><td class="fb-ru">арендовать</td></tr>
 <tr><td class="fb-he" dir="rtl">שכירות</td><td class="fb-tr">схирут</td><td class="fb-ru">аренда</td></tr>
 <tr><td class="fb-he" dir="rtl">למכור</td><td class="fb-tr">лимкор</td><td class="fb-ru">продавать</td></tr>
@@ -355,8 +435,7 @@
 <tr><td class="fb-he" dir="rtl">כתובת</td><td class="fb-tr">ктовэт</td><td class="fb-ru">адрес <span class="fb-g">נ׳</span></td></tr>
 <tr><td class="fb-he" dir="rtl">מידע</td><td class="fb-tr">мэда</td><td class="fb-ru">информация <span class="fb-g">ז׳</span></td></tr>
 </table>
-<h3 class="fb-cat">Прилагательные · שמות תואר</h3>
-<table class="fb-tbl">
+<h3 class="fb-cat">Тема · Прилагательные</h3><table class="fb-tbl">
 <tr><td class="fb-he" dir="rtl">גדול, גדולה</td><td class="fb-tr">гадоль, гдола</td><td class="fb-ru">большой / ая</td></tr>
 <tr><td class="fb-he" dir="rtl">קטן, קטנה</td><td class="fb-tr">катан, ктана</td><td class="fb-ru">маленький / ая</td></tr>
 <tr><td class="fb-he" dir="rtl">חדש, חדשה</td><td class="fb-tr">хадаш, хадаша</td><td class="fb-ru">новый / ая</td></tr>
@@ -368,13 +447,363 @@
 <tr><td class="fb-he" dir="rtl">מיוחד, מיוחדת</td><td class="fb-tr">меюхад, меюхедет</td><td class="fb-ru">специальный, особенный</td></tr>
 <tr><td class="fb-he" dir="rtl">מצוין, מצוינת</td><td class="fb-tr">мецуян, мецуенет</td><td class="fb-ru">отличный / ая</td></tr>
 </table>
+<h3 class="fb-cat">Урок 1</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">אמא</td><td class="fb-tr">има</td><td class="fb-ru">мать <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יין</td><td class="fb-tr">яин</td><td class="fb-ru">вино <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ים</td><td class="fb-tr">ям</td><td class="fb-ru">море <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מים</td><td class="fb-tr">маим</td><td class="fb-ru">вода <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מתנה</td><td class="fb-tr">матана</td><td class="fb-ru">подарок <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אני</td><td class="fb-tr">ани</td><td class="fb-ru">я <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">את</td><td class="fb-tr">ат</td><td class="fb-ru">ты (ж.р.) <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אתה</td><td class="fb-tr">ата</td><td class="fb-ru">ты (м.р.) <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">היא</td><td class="fb-tr">hи</td><td class="fb-ru">она <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מה</td><td class="fb-tr">ма</td><td class="fb-ru">что? <span class="fb-g">Вопросительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מי</td><td class="fb-tr">ми</td><td class="fb-ru">кто? <span class="fb-g">Вопросительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">היי</td><td class="fb-tr">hай</td><td class="fb-ru">привет! <span class="fb-g">Разное</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 2</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">איש</td><td class="fb-tr">иш</td><td class="fb-ru">человек <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אישה</td><td class="fb-tr">иша</td><td class="fb-ru">женщина, жена <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">גלידה</td><td class="fb-tr">глида</td><td class="fb-ru">мороженое <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">דגל</td><td class="fb-tr">дэгель</td><td class="fb-ru">флаг <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הר</td><td class="fb-tr">hар</td><td class="fb-ru">гора <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ילד</td><td class="fb-tr">елед</td><td class="fb-ru">мальчик, ребёнок <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ילדה</td><td class="fb-tr">ялда</td><td class="fb-ru">девочка <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שיר</td><td class="fb-tr">шир</td><td class="fb-ru">песня, стихотворение <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שמש</td><td class="fb-tr">шемеш</td><td class="fb-ru">солнце <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תלמיד, תלמידה</td><td class="fb-tr">талмид, талмида</td><td class="fb-ru">ученик, ученица <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מאין</td><td class="fb-tr">меаин</td><td class="fb-ru">откуда? <span class="fb-g">Вопросительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ה...</td><td class="fb-tr">hа</td><td class="fb-ru">определённый артикль (the) <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מ..., מן</td><td class="fb-tr">ми, мин</td><td class="fb-ru">из, от <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">של</td><td class="fb-tr">шель</td><td class="fb-ru">предлог принадлежности (of) <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">גם</td><td class="fb-tr">гам</td><td class="fb-ru">также <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הנה</td><td class="fb-tr">hинэ</td><td class="fb-ru">вот <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שם</td><td class="fb-tr">шам</td><td class="fb-ru">там <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">נתניה</td><td class="fb-tr">Нетания</td><td class="fb-ru">Нетания <span class="fb-g">География</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ישראל</td><td class="fb-tr">Исраэль</td><td class="fb-ru">Израиль <span class="fb-g">География</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 3</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">גר</td><td class="fb-tr">гар</td><td class="fb-ru">проживает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לומד</td><td class="fb-tr">ломед</td><td class="fb-ru">изучает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שר</td><td class="fb-tr">шар</td><td class="fb-ru">поёт <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">או</td><td class="fb-tr">о</td><td class="fb-ru">или <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ו...</td><td class="fb-tr">вэ</td><td class="fb-ru">и <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אנגלית</td><td class="fb-tr">англит</td><td class="fb-ru">английский язык <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">גרמנית</td><td class="fb-tr">германит</td><td class="fb-ru">немецкий язык <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חלה</td><td class="fb-tr">хала</td><td class="fb-ru">хала (хлеб) <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יידיש</td><td class="fb-tr">йидиш</td><td class="fb-ru">идиш <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לחם</td><td class="fb-tr">лехем</td><td class="fb-ru">хлеб <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לימון</td><td class="fb-tr">лимон</td><td class="fb-ru">лимон <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מורה</td><td class="fb-tr">морэ, мора</td><td class="fb-ru">учитель, учительница <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מלח</td><td class="fb-tr">мелах</td><td class="fb-ru">соль <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רומנית</td><td class="fb-tr">романит</td><td class="fb-ru">румынский язык <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אתם</td><td class="fb-tr">атэм</td><td class="fb-ru">вы (м.р.) <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אתן</td><td class="fb-tr">атэн</td><td class="fb-ru">вы (ж.р.) <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הם</td><td class="fb-tr">hэм</td><td class="fb-ru">они (м.р.) <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הן</td><td class="fb-tr">hэн</td><td class="fb-ru">они (ж.р.) <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">זה</td><td class="fb-tr">зэ</td><td class="fb-ru">этот, это <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">זאת</td><td class="fb-tr">зот</td><td class="fb-ru">эта <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אלה</td><td class="fb-tr">эле</td><td class="fb-ru">эти <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לא</td><td class="fb-tr">ло</td><td class="fb-ru">нет <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">להתראות</td><td class="fb-tr">леитраот</td><td class="fb-ru">до свидания <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שלום</td><td class="fb-tr">шалом</td><td class="fb-ru">здравствуйте / до свидания <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תודה</td><td class="fb-tr">тода</td><td class="fb-ru">спасибо <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">דימונה</td><td class="fb-tr">Димона</td><td class="fb-ru">Димона <span class="fb-g">География</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הגולן</td><td class="fb-tr">hаГолан</td><td class="fb-ru">Голаны <span class="fb-g">География</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ים המלח</td><td class="fb-tr">Ям hаМелах</td><td class="fb-ru">Мёртвое море <span class="fb-g">География</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 4</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">ארץ</td><td class="fb-tr">эрец</td><td class="fb-ru">страна <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מיץ</td><td class="fb-tr">миц</td><td class="fb-ru">сок <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מסעדה</td><td class="fb-tr">мисъада</td><td class="fb-ru">ресторан <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עוגה</td><td class="fb-tr">уга</td><td class="fb-ru">торт, кекс <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עיר</td><td class="fb-tr">ир</td><td class="fb-ru">город <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">סרט</td><td class="fb-tr">серет</td><td class="fb-ru">фильм <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רגע</td><td class="fb-tr">рега</td><td class="fb-ru">момент <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רוסית</td><td class="fb-tr">русит</td><td class="fb-ru">русский язык <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אנחנו</td><td class="fb-tr">анахну</td><td class="fb-ru">мы <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הוא</td><td class="fb-tr">hу</td><td class="fb-ru">он <span class="fb-g">Местоимения</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לאן</td><td class="fb-tr">леан</td><td class="fb-ru">куда? <span class="fb-g">Вопросительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עושה</td><td class="fb-tr">осэ</td><td class="fb-ru">делает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רוצה</td><td class="fb-tr">роцэ</td><td class="fb-ru">хочет <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שותה</td><td class="fb-tr">шотэ</td><td class="fb-ru">пьёт <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ל...</td><td class="fb-tr">ле</td><td class="fb-ru">к, для <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עם</td><td class="fb-tr">им</td><td class="fb-ru">с <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אולי</td><td class="fb-tr">улай</td><td class="fb-ru">может быть <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מה נשמע</td><td class="fb-tr">ма нишма</td><td class="fb-ru">как дела? <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מצוין</td><td class="fb-tr">мецуян</td><td class="fb-ru">прекрасно <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">נעים מאוד</td><td class="fb-tr">наим меод</td><td class="fb-ru">очень приятно <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">סליחה</td><td class="fb-tr">слиха</td><td class="fb-ru">извините <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לעשות חיים</td><td class="fb-tr">лаасот хаим</td><td class="fb-ru">веселиться <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">קצת</td><td class="fb-tr">кцат</td><td class="fb-ru">немного <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רק</td><td class="fb-tr">рак</td><td class="fb-ru">только <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ירושלים</td><td class="fb-tr">Йерушалаим</td><td class="fb-ru">Иерусалим <span class="fb-g">География</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 5</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">אבא</td><td class="fb-tr">аба</td><td class="fb-ru">отец <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אולפן</td><td class="fb-tr">ульпан</td><td class="fb-ru">ульпан (курсы) <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אשכולית</td><td class="fb-tr">эшколит</td><td class="fb-ru">грейпфрут <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בית</td><td class="fb-tr">баит</td><td class="fb-ru">дом <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יפנית</td><td class="fb-tr">япанит</td><td class="fb-ru">японский язык <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כיתה</td><td class="fb-tr">кита</td><td class="fb-ru">класс, классная комната <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">משפחה</td><td class="fb-tr">мишпаха</td><td class="fb-ru">семья <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עולם</td><td class="fb-tr">олам</td><td class="fb-ru">мир <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">פולנית</td><td class="fb-tr">поланит</td><td class="fb-ru">польский язык <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">פורטוגזית</td><td class="fb-tr">португезит</td><td class="fb-ru">португальский язык <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תפוז</td><td class="fb-tr">тапуз</td><td class="fb-ru">апельсин <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ב...</td><td class="fb-tr">бэ</td><td class="fb-ru">в <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ליד</td><td class="fb-tr">леяд</td><td class="fb-ru">у, около <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">על</td><td class="fb-tr">аль</td><td class="fb-ru">о, про <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מדבר</td><td class="fb-tr">медабер</td><td class="fb-ru">разговаривает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אין</td><td class="fb-tr">эйн</td><td class="fb-ru">нет, нету <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בסדר</td><td class="fb-tr">бэседер</td><td class="fb-ru">всё в порядке <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הכל</td><td class="fb-tr">hаколь</td><td class="fb-ru">всё <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הרבה</td><td class="fb-tr">hарбэ</td><td class="fb-ru">много <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יש</td><td class="fb-tr">еш</td><td class="fb-ru">есть, имеется <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כל העולם</td><td class="fb-tr">коль hаолам</td><td class="fb-ru">весь мир <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כן</td><td class="fb-tr">кен</td><td class="fb-ru">да <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">פה</td><td class="fb-tr">по</td><td class="fb-ru">здесь <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בת ים</td><td class="fb-tr">Бат-Ям</td><td class="fb-ru">Бат-Ям <span class="fb-g">География</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 6</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">חלב</td><td class="fb-tr">халав</td><td class="fb-ru">молоко <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מחשב</td><td class="fb-tr">махшев</td><td class="fb-ru">компьютер <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מכתב</td><td class="fb-tr">михтав</td><td class="fb-ru">письмо <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מלון</td><td class="fb-tr">малон</td><td class="fb-ru">гостиница, отель <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ספר</td><td class="fb-tr">сефер</td><td class="fb-ru">книга <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ספרדית</td><td class="fb-tr">сфарадит</td><td class="fb-ru">испанский язык <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ערבית</td><td class="fb-tr">аравит</td><td class="fb-ru">арабский язык <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">צרפתית</td><td class="fb-tr">царфатит</td><td class="fb-ru">французский язык <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שיעור</td><td class="fb-tr">шиур</td><td class="fb-ru">урок <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בבקשה</td><td class="fb-tr">бэвакаша</td><td class="fb-ru">пожалуйста <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בוקר טוב</td><td class="fb-tr">бокер тов</td><td class="fb-ru">доброе утро <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ברוך השם</td><td class="fb-tr">барух hашем</td><td class="fb-ru">слава Богу <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ברוכים הבאים</td><td class="fb-tr">брухим hабаим</td><td class="fb-ru">добро пожаловать <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">דרישת שלום</td><td class="fb-tr">дришат шалом</td><td class="fb-ru">передать привет <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הכנסת</td><td class="fb-tr">hаКнесет</td><td class="fb-ru">кнессет <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">טוב</td><td class="fb-tr">тов</td><td class="fb-ru">хорошо <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יופי</td><td class="fb-tr">йофи</td><td class="fb-ru">прекрасно! <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מאוד</td><td class="fb-tr">меод</td><td class="fb-ru">очень <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מה שלומך</td><td class="fb-tr">ма шломха</td><td class="fb-ru">как поживаешь? (м.р.) <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מה שלומך</td><td class="fb-tr">ма шломех</td><td class="fb-ru">как поживаешь? (ж.р.) <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עכשיו</td><td class="fb-tr">ахшав</td><td class="fb-ru">теперь, сейчас <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ערב טוב</td><td class="fb-tr">эрев тов</td><td class="fb-ru">добрый вечер <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">איפה</td><td class="fb-tr">эйфо</td><td class="fb-ru">где? <span class="fb-g">Вопросительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אבל</td><td class="fb-tr">аваль</td><td class="fb-ru">но <span class="fb-g">Служебные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אוהב</td><td class="fb-tr">оhев</td><td class="fb-ru">любит <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בא</td><td class="fb-tr">ба</td><td class="fb-ru">приходит <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הולך</td><td class="fb-tr">hолех</td><td class="fb-ru">идёт, ходит <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כותב</td><td class="fb-tr">котев</td><td class="fb-ru">пишет <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">קורא</td><td class="fb-tr">корэ</td><td class="fb-ru">читает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חיפה</td><td class="fb-tr">Хайфа</td><td class="fb-ru">Хайфа <span class="fb-g">География</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יפו</td><td class="fb-tr">Яфо</td><td class="fb-ru">Яффо <span class="fb-g">География</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תל אביב</td><td class="fb-tr">Тель-Авив</td><td class="fb-ru">Тель-Авив <span class="fb-g">География</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 7</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">אחת</td><td class="fb-tr">ахат</td><td class="fb-ru">одна (ж.р.) <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שתיים</td><td class="fb-tr">штаим</td><td class="fb-ru">две <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שלוש</td><td class="fb-tr">шалош</td><td class="fb-ru">три <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ארבע</td><td class="fb-tr">арба</td><td class="fb-ru">четыре <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חמש</td><td class="fb-tr">хамеш</td><td class="fb-ru">пять <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שש</td><td class="fb-tr">шеш</td><td class="fb-ru">шесть <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שבע</td><td class="fb-tr">шева</td><td class="fb-ru">семь <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שמונה</td><td class="fb-tr">шмонэ</td><td class="fb-ru">восемь <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תשע</td><td class="fb-tr">тэша</td><td class="fb-ru">девять <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עשר</td><td class="fb-tr">эсэр</td><td class="fb-ru">десять <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אחת עשרה</td><td class="fb-tr">ахат-эсрэ</td><td class="fb-ru">одиннадцать <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שתים עשרה</td><td class="fb-tr">штэйм-эсрэ</td><td class="fb-ru">двенадцать <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יודע</td><td class="fb-tr">йодеа</td><td class="fb-ru">знает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חדשות</td><td class="fb-tr">хадашот</td><td class="fb-ru">новости <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חצי</td><td class="fb-tr">хеци</td><td class="fb-ru">половина <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רבע</td><td class="fb-tr">рева</td><td class="fb-ru">четверть <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שעה</td><td class="fb-tr">шаа</td><td class="fb-ru">час <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שעון</td><td class="fb-tr">шаон</td><td class="fb-ru">часы <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שקט</td><td class="fb-tr">шекет</td><td class="fb-ru">тишина, покой <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אז</td><td class="fb-tr">аз</td><td class="fb-ru">тогда <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">איזה מזל</td><td class="fb-tr">эйзэ мазаль</td><td class="fb-ru">какая удача! <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מה השעה</td><td class="fb-tr">ма hашаа</td><td class="fb-ru">который час? <span class="fb-g">Разное</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 8</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">חבר, חברה</td><td class="fb-tr">хавер, хавера</td><td class="fb-ru">друг, подруга <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">משנה</td><td class="fb-tr">мишна</td><td class="fb-ru">Мишна <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">קיבוץ</td><td class="fb-tr">кибуц</td><td class="fb-ru">кибуц <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שבת</td><td class="fb-tr">шабат</td><td class="fb-ru">суббота <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תלמוד</td><td class="fb-tr">талмуд</td><td class="fb-ru">Талмуд <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תנ"ך</td><td class="fb-tr">танах</td><td class="fb-ru">Танах (Библия) <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אשדוד</td><td class="fb-tr">Ашдод</td><td class="fb-ru">Ашдод <span class="fb-g">География</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אשקלון</td><td class="fb-tr">Ашкелон</td><td class="fb-ru">Ашкелон <span class="fb-g">География</span></td></tr>
+<tr><td class="fb-he" dir="rtl">באר שבע</td><td class="fb-tr">Беэр-Шева</td><td class="fb-ru">Беэр-Шева <span class="fb-g">География</span></td></tr>
+<tr><td class="fb-he" dir="rtl">צפת</td><td class="fb-tr">Цфат</td><td class="fb-ru">Цфат <span class="fb-g">География</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הגליל</td><td class="fb-tr">hаГалиль</td><td class="fb-ru">Галилея <span class="fb-g">География</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כולם</td><td class="fb-tr">кулам</td><td class="fb-ru">все <span class="fb-g">Разное</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 9</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">אפס</td><td class="fb-tr">эфес</td><td class="fb-ru">ноль <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בוקר</td><td class="fb-tr">бокер</td><td class="fb-ru">утро <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חנות</td><td class="fb-tr">ханут</td><td class="fb-ru">магазин <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לחמנייה</td><td class="fb-tr">лахмания</td><td class="fb-ru">булочка <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לילה</td><td class="fb-tr">лайла</td><td class="fb-ru">ночь <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מספר</td><td class="fb-tr">миспар</td><td class="fb-ru">число <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ספרייה</td><td class="fb-tr">сифрия</td><td class="fb-ru">библиотека <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עבודה</td><td class="fb-tr">авода</td><td class="fb-ru">работа <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ערב</td><td class="fb-tr">эрев</td><td class="fb-ru">вечер <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">צהריים</td><td class="fb-tr">цаhораим</td><td class="fb-ru">полдень <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רחוב</td><td class="fb-tr">рехов</td><td class="fb-ru">улица <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שירותים</td><td class="fb-tr">шерутим</td><td class="fb-ru">туалет <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אומר</td><td class="fb-tr">омер</td><td class="fb-ru">говорит <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מבין</td><td class="fb-tr">мевин</td><td class="fb-ru">понимает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מצטער</td><td class="fb-tr">мицтаэр</td><td class="fb-ru">сожалеет <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">נוסע</td><td class="fb-tr">носеа</td><td class="fb-ru">едет <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עובד</td><td class="fb-tr">овед</td><td class="fb-ru">работает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">קונה</td><td class="fb-tr">конэ</td><td class="fb-ru">покупает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שומע</td><td class="fb-tr">шомеа</td><td class="fb-ru">слышит <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ציבורי, ציבורית</td><td class="fb-tr">цибури, цибурит</td><td class="fb-ru">общественный/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אין דבר</td><td class="fb-tr">эйн давар</td><td class="fb-ru">неважно <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בטח</td><td class="fb-tr">бетах</td><td class="fb-ru">конечно <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">גם וגם</td><td class="fb-tr">гам вэгам</td><td class="fb-ru">и то и это <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ימינה</td><td class="fb-tr">ямина</td><td class="fb-ru">направо <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ישר</td><td class="fb-tr">яшар</td><td class="fb-ru">прямо <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מודיעין</td><td class="fb-tr">модиин</td><td class="fb-ru">информация (справочная) <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">נכון</td><td class="fb-tr">нахон</td><td class="fb-ru">правильно, верно <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שמאלה</td><td class="fb-tr">смола</td><td class="fb-ru">налево <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שתי</td><td class="fb-tr">штэй</td><td class="fb-ru">два (ж.р., сопряж.) <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">איך</td><td class="fb-tr">эйх</td><td class="fb-ru">как? <span class="fb-g">Вопросительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כמה</td><td class="fb-tr">кама</td><td class="fb-ru">сколько? <span class="fb-g">Вопросительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מתי</td><td class="fb-tr">матай</td><td class="fb-ru">когда? <span class="fb-g">Вопросительные</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 10</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">אהבה</td><td class="fb-tr">аhава</td><td class="fb-ru">любовь <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ארמון</td><td class="fb-tr">армон</td><td class="fb-ru">замок, дворец <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בחור, בחורה</td><td class="fb-tr">бахур, бахура</td><td class="fb-ru">парень, девушка <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">גינה</td><td class="fb-tr">гина</td><td class="fb-ru">сад <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">דירה</td><td class="fb-tr">дира</td><td class="fb-ru">квартира <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חדר</td><td class="fb-tr">хедер</td><td class="fb-ru">комната <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חנוכייה</td><td class="fb-tr">ханукия</td><td class="fb-ru">ханукальный светильник <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מחברת</td><td class="fb-tr">махберет</td><td class="fb-ru">тетрадь <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מטבח</td><td class="fb-tr">митбах</td><td class="fb-ru">кухня <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מקלחת</td><td class="fb-tr">миклахат</td><td class="fb-ru">душ <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עץ</td><td class="fb-tr">эц</td><td class="fb-ru">дерево <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ציור</td><td class="fb-tr">циур</td><td class="fb-ru">картина, рисунок <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שולחן</td><td class="fb-tr">шульхан</td><td class="fb-ru">стол <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">גדול, גדולה</td><td class="fb-tr">гадоль, гдола</td><td class="fb-ru">большой/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חדש, חדשה</td><td class="fb-tr">хадаш, хадаша</td><td class="fb-ru">новый/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">טוב, טובה</td><td class="fb-tr">тов, това</td><td class="fb-ru">хороший/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יפה, יפה</td><td class="fb-tr">яфэ, яфа</td><td class="fb-ru">красивый/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ישן, ישנה</td><td class="fb-tr">яшан, йешана</td><td class="fb-ru">старый/ая, старинный <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מיוחד, מיוחדת</td><td class="fb-tr">меюхад, меюхедет</td><td class="fb-ru">специальный, особенный <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מצוין, מצוינת</td><td class="fb-tr">мецуян, мецуенет</td><td class="fb-ru">отличный/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">נחמד, נחמדה</td><td class="fb-tr">нэхмад, нэхмада</td><td class="fb-ru">приятный/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עתיק, עתיקה</td><td class="fb-tr">атик, атика</td><td class="fb-ru">древний/яя <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">קטן, קטנה</td><td class="fb-tr">катан, ктана</td><td class="fb-ru">маленький/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">איזה</td><td class="fb-tr">эйзэ</td><td class="fb-ru">какой? <span class="fb-g">Вопросительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">איזו</td><td class="fb-tr">эйзо</td><td class="fb-ru">какая? <span class="fb-g">Вопросительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אילו</td><td class="fb-tr">эйлу</td><td class="fb-ru">какие? <span class="fb-g">Вопросительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בקשר ל</td><td class="fb-tr">бэкешер ле</td><td class="fb-ru">насчёт, что касается <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כמו</td><td class="fb-tr">кмо</td><td class="fb-ru">как (подобно) <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">למשל</td><td class="fb-tr">лемашаль</td><td class="fb-ru">например <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לפעמים</td><td class="fb-tr">лифамим</td><td class="fb-ru">иногда <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">על שם</td><td class="fb-tr">аль шем</td><td class="fb-ru">названный в честь <span class="fb-g">Разное</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 11</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">אוהל</td><td class="fb-tr">оhель</td><td class="fb-ru">палатка <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אכסניה</td><td class="fb-tr">ахсания</td><td class="fb-ru">гостиница (хостел) <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בית כנסת</td><td class="fb-tr">бейт кнесет</td><td class="fb-ru">синагога <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">גבר</td><td class="fb-tr">гевер</td><td class="fb-ru">мужчина <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">דקה</td><td class="fb-tr">дака</td><td class="fb-ru">минута <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יום</td><td class="fb-tr">йом</td><td class="fb-ru">день <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כיסא</td><td class="fb-tr">кисэ</td><td class="fb-ru">стул <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מיטה</td><td class="fb-tr">мита</td><td class="fb-ru">кровать <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מילה</td><td class="fb-tr">мила</td><td class="fb-ru">слово <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מקום</td><td class="fb-tr">маком</td><td class="fb-ru">место <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">פיתה</td><td class="fb-tr">пита</td><td class="fb-ru">пита <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רהיט</td><td class="fb-tr">раhит</td><td class="fb-ru">мебель <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שטיח</td><td class="fb-tr">шатиах</td><td class="fb-ru">ковёр <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שקל</td><td class="fb-tr">шекель</td><td class="fb-ru">шекель <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אוכל</td><td class="fb-tr">охель</td><td class="fb-ru">ест <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יושב</td><td class="fb-tr">йошев</td><td class="fb-ru">сидит <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מטייל</td><td class="fb-tr">метаель</td><td class="fb-ru">гуляет <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עולה</td><td class="fb-tr">олэ</td><td class="fb-ru">стоит (о цене) <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אחר, אחרת</td><td class="fb-tr">ахер, ахерет</td><td class="fb-ru">другой, иной <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בשרי, בשרית</td><td class="fb-tr">бсари, бсарит</td><td class="fb-ru">мясной/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חלבי, חלבית</td><td class="fb-tr">халави, халавит</td><td class="fb-ru">молочный/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ישראלי, ישראלית</td><td class="fb-tr">исраэли, исраэлит</td><td class="fb-ru">израильский/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אחד</td><td class="fb-tr">эхад</td><td class="fb-ru">один (м.р.) <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שניים</td><td class="fb-tr">шнаим</td><td class="fb-ru">два <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שלושה</td><td class="fb-tr">шлоша</td><td class="fb-ru">три <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעה</td><td class="fb-tr">арбаа</td><td class="fb-ru">четыре <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חמישה</td><td class="fb-tr">хамиша</td><td class="fb-ru">пять <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שישה</td><td class="fb-tr">шиша</td><td class="fb-ru">шесть <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שבעה</td><td class="fb-tr">шива</td><td class="fb-ru">семь <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שמונה</td><td class="fb-tr">шмона</td><td class="fb-ru">восемь <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תשעה</td><td class="fb-tr">тиша</td><td class="fb-ru">девять <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עשרה</td><td class="fb-tr">асара</td><td class="fb-ru">десять <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אלף</td><td class="fb-tr">элеф</td><td class="fb-ru">тысяча <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים</td><td class="fb-tr">хамишим</td><td class="fb-ru">пятьдесят <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מאה</td><td class="fb-tr">меа</td><td class="fb-ru">сто <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים</td><td class="fb-tr">тишим</td><td class="fb-ru">девяносто <span class="fb-g">Числительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כל</td><td class="fb-tr">коль</td><td class="fb-ru">все, каждый, любой <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">משהו</td><td class="fb-tr">машеху</td><td class="fb-ru">что-то <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עוד</td><td class="fb-tr">од</td><td class="fb-ru">ещё <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תודה רבה</td><td class="fb-tr">тода раба</td><td class="fb-ru">большое спасибо <span class="fb-g">Разное</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 12</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">דוד, דודה</td><td class="fb-tr">дод, дода</td><td class="fb-ru">дядя, тётя <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">כסף</td><td class="fb-tr">кесеф</td><td class="fb-ru">деньги <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מוכר, מוכרת</td><td class="fb-tr">мохер, мохерет</td><td class="fb-ru">продавец, продавщица <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">עיתון</td><td class="fb-tr">итон</td><td class="fb-ru">газета <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שבוע</td><td class="fb-tr">шавуа</td><td class="fb-ru">неделя <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">תיק</td><td class="fb-tr">тик</td><td class="fb-ru">сумка, папка <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מחפש</td><td class="fb-tr">мехапес</td><td class="fb-ru">ищет <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מכיר</td><td class="fb-tr">макир</td><td class="fb-ru">знает, знаком <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">פוגש</td><td class="fb-tr">погеш</td><td class="fb-ru">встречает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רואה</td><td class="fb-tr">роэ</td><td class="fb-ru">видит <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">זול, זולה</td><td class="fb-tr">золь, зола</td><td class="fb-ru">дешёвый/ая <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">נכון, נכונה</td><td class="fb-tr">нахон, нехона</td><td class="fb-ru">верный, правильный <span class="fb-g">Прилагательные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">את</td><td class="fb-tr">эт</td><td class="fb-ru">частица прямого дополнения <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">היום</td><td class="fb-tr">hайом</td><td class="fb-ru">сегодня <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">הכותל המערבי</td><td class="fb-tr">hаКотель hаМаарави</td><td class="fb-ru">Стена Плача <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">זהו</td><td class="fb-tr">зэhу</td><td class="fb-ru">вот именно <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מחר</td><td class="fb-tr">махар</td><td class="fb-ru">завтра <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יום ראשון</td><td class="fb-tr">йом ришон</td><td class="fb-ru">воскресенье <span class="fb-g">Дни недели</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יום שני</td><td class="fb-tr">йом шени</td><td class="fb-ru">понедельник <span class="fb-g">Дни недели</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יום שלישי</td><td class="fb-tr">йом шлиши</td><td class="fb-ru">вторник <span class="fb-g">Дни недели</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יום רביעי</td><td class="fb-tr">йом ревии</td><td class="fb-ru">среда <span class="fb-g">Дни недели</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יום חמישי</td><td class="fb-tr">йом хамиши</td><td class="fb-ru">четверг <span class="fb-g">Дни недели</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יום שישי</td><td class="fb-tr">йом шиши</td><td class="fb-ru">пятница <span class="fb-g">Дни недели</span></td></tr>
+<tr><td class="fb-he" dir="rtl">אהלן</td><td class="fb-tr">аhалан</td><td class="fb-ru">привет! (сленг) <span class="fb-g">Разное</span></td></tr>
+</table>
+<h3 class="fb-cat">Урок 13</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">אלף בית</td><td class="fb-tr">алеф-бет</td><td class="fb-ru">алфавит <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בגד</td><td class="fb-tr">бегед</td><td class="fb-ru">одежда <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בעל</td><td class="fb-tr">бааль</td><td class="fb-ru">муж <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">גניזה</td><td class="fb-tr">гниза</td><td class="fb-ru">архив (гениза) <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">זמן</td><td class="fb-tr">зман</td><td class="fb-ru">время <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">יהודי, יהודייה</td><td class="fb-tr">йеhуди, йеhудия</td><td class="fb-ru">еврей, еврейка <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מאה</td><td class="fb-tr">меа</td><td class="fb-ru">сто (сотня) <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רב</td><td class="fb-tr">рав</td><td class="fb-ru">раввин <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שם</td><td class="fb-tr">шем</td><td class="fb-ru">имя <span class="fb-g">Существительные</span></td></tr>
+<tr><td class="fb-he" dir="rtl">חושב</td><td class="fb-tr">хошев</td><td class="fb-ru">думает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לובש</td><td class="fb-tr">ловеш</td><td class="fb-ru">одевает(ся) <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">רץ</td><td class="fb-tr">рац</td><td class="fb-ru">бежит, бегает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שואל</td><td class="fb-tr">шоэль</td><td class="fb-ru">спрашивает <span class="fb-g">Глаголы</span></td></tr>
+<tr><td class="fb-he" dir="rtl">בשקט</td><td class="fb-tr">бэшекет</td><td class="fb-ru">спокойно, тихо <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">ועוד</td><td class="fb-tr">вэод</td><td class="fb-ru">ещё, и более <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">לאט</td><td class="fb-tr">леат</td><td class="fb-ru">медленно <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מהר</td><td class="fb-tr">маэр</td><td class="fb-ru">быстро <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מישהו</td><td class="fb-tr">мишеху</td><td class="fb-ru">кто-то <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">קשה</td><td class="fb-tr">кашэ</td><td class="fb-ru">тяжёлый, трудный <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מה שמך</td><td class="fb-tr">ма шмех</td><td class="fb-ru">как тебя зовут? (ж.р.) <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">מה שמך</td><td class="fb-tr">ма шимха</td><td class="fb-ru">как тебя зовут? (м.р.) <span class="fb-g">Разное</span></td></tr>
+<tr><td class="fb-he" dir="rtl">שמי</td><td class="fb-tr">шми</td><td class="fb-ru">моё имя <span class="fb-g">Разное</span></td></tr>
+</table>
   </section>
 
 </div>
 
 <script>
-/* ---------- словарь (из файла «квартира_город») ---------- */
-const WORDS = [
+/* ===== данные ===== */
+const THEME = [
+
   // КВАРТИРА
   {he:"דירה",tr:"дира",ru:"квартира",cat:"Квартира",g:"נ׳"},
   {he:"חדר",tr:"хедер",ru:"комната",cat:"Квартира",g:"ז׳"},
@@ -467,191 +896,552 @@ const WORDS = [
   {he:"מיוחד, מיוחדת",tr:"меюхад, меюхедет",ru:"специальный, особенный",cat:"Прилагательные"},
   {he:"מצוין, מצוינת",tr:"мецуян, мецуенет",ru:"отличный / ая",cat:"Прилагательные"},
 ];
+const LESSONS = [
+  // Урок 1
+  {he:"אמא",tr:"има",ru:"мать",cat:"Существительные",les:1},
+  {he:"יין",tr:"яин",ru:"вино",cat:"Существительные",les:1},
+  {he:"ים",tr:"ям",ru:"море",cat:"Существительные",les:1},
+  {he:"מים",tr:"маим",ru:"вода",cat:"Существительные",les:1},
+  {he:"מתנה",tr:"матана",ru:"подарок",cat:"Существительные",les:1},
+  {he:"אני",tr:"ани",ru:"я",cat:"Местоимения",les:1},
+  {he:"את",tr:"ат",ru:"ты (ж.р.)",cat:"Местоимения",les:1},
+  {he:"אתה",tr:"ата",ru:"ты (м.р.)",cat:"Местоимения",les:1},
+  {he:"היא",tr:"hи",ru:"она",cat:"Местоимения",les:1},
+  {he:"מה",tr:"ма",ru:"что?",cat:"Вопросительные",les:1},
+  {he:"מי",tr:"ми",ru:"кто?",cat:"Вопросительные",les:1},
+  {he:"היי",tr:"hай",ru:"привет!",cat:"Разное",les:1},
+  // Урок 2
+  {he:"איש",tr:"иш",ru:"человек",cat:"Существительные",les:2},
+  {he:"אישה",tr:"иша",ru:"женщина, жена",cat:"Существительные",les:2},
+  {he:"גלידה",tr:"глида",ru:"мороженое",cat:"Существительные",les:2},
+  {he:"דגל",tr:"дэгель",ru:"флаг",cat:"Существительные",les:2},
+  {he:"הר",tr:"hар",ru:"гора",cat:"Существительные",les:2},
+  {he:"ילד",tr:"елед",ru:"мальчик, ребёнок",cat:"Существительные",les:2},
+  {he:"ילדה",tr:"ялда",ru:"девочка",cat:"Существительные",les:2},
+  {he:"שיר",tr:"шир",ru:"песня, стихотворение",cat:"Существительные",les:2},
+  {he:"שמש",tr:"шемеш",ru:"солнце",cat:"Существительные",les:2},
+  {he:"תלמיד, תלמידה",tr:"талмид, талмида",ru:"ученик, ученица",cat:"Существительные",les:2},
+  {he:"מאין",tr:"меаин",ru:"откуда?",cat:"Вопросительные",les:2},
+  {he:"ה...",tr:"hа",ru:"определённый артикль (the)",cat:"Служебные",les:2},
+  {he:"מ..., מן",tr:"ми, мин",ru:"из, от",cat:"Служебные",les:2},
+  {he:"של",tr:"шель",ru:"предлог принадлежности (of)",cat:"Служебные",les:2},
+  {he:"גם",tr:"гам",ru:"также",cat:"Разное",les:2},
+  {he:"הנה",tr:"hинэ",ru:"вот",cat:"Разное",les:2},
+  {he:"שם",tr:"шам",ru:"там",cat:"Разное",les:2},
+  {he:"נתניה",tr:"Нетания",ru:"Нетания",cat:"География",les:2},
+  {he:"ישראל",tr:"Исраэль",ru:"Израиль",cat:"География",les:2},
+  // Урок 3
+  {he:"גר",tr:"гар",ru:"проживает",cat:"Глаголы",les:3},
+  {he:"לומד",tr:"ломед",ru:"изучает",cat:"Глаголы",les:3},
+  {he:"שר",tr:"шар",ru:"поёт",cat:"Глаголы",les:3},
+  {he:"או",tr:"о",ru:"или",cat:"Служебные",les:3},
+  {he:"ו...",tr:"вэ",ru:"и",cat:"Служебные",les:3},
+  {he:"אנגלית",tr:"англит",ru:"английский язык",cat:"Существительные",les:3},
+  {he:"גרמנית",tr:"германит",ru:"немецкий язык",cat:"Существительные",les:3},
+  {he:"חלה",tr:"хала",ru:"хала (хлеб)",cat:"Существительные",les:3},
+  {he:"יידיש",tr:"йидиш",ru:"идиш",cat:"Существительные",les:3},
+  {he:"לחם",tr:"лехем",ru:"хлеб",cat:"Существительные",les:3},
+  {he:"לימון",tr:"лимон",ru:"лимон",cat:"Существительные",les:3},
+  {he:"מורה",tr:"морэ, мора",ru:"учитель, учительница",cat:"Существительные",les:3},
+  {he:"מלח",tr:"мелах",ru:"соль",cat:"Существительные",les:3},
+  {he:"רומנית",tr:"романит",ru:"румынский язык",cat:"Существительные",les:3},
+  {he:"אתם",tr:"атэм",ru:"вы (м.р.)",cat:"Местоимения",les:3},
+  {he:"אתן",tr:"атэн",ru:"вы (ж.р.)",cat:"Местоимения",les:3},
+  {he:"הם",tr:"hэм",ru:"они (м.р.)",cat:"Местоимения",les:3},
+  {he:"הן",tr:"hэн",ru:"они (ж.р.)",cat:"Местоимения",les:3},
+  {he:"זה",tr:"зэ",ru:"этот, это",cat:"Местоимения",les:3},
+  {he:"זאת",tr:"зот",ru:"эта",cat:"Местоимения",les:3},
+  {he:"אלה",tr:"эле",ru:"эти",cat:"Местоимения",les:3},
+  {he:"לא",tr:"ло",ru:"нет",cat:"Разное",les:3},
+  {he:"להתראות",tr:"леитраот",ru:"до свидания",cat:"Разное",les:3},
+  {he:"שלום",tr:"шалом",ru:"здравствуйте / до свидания",cat:"Разное",les:3},
+  {he:"תודה",tr:"тода",ru:"спасибо",cat:"Разное",les:3},
+  {he:"דימונה",tr:"Димона",ru:"Димона",cat:"География",les:3},
+  {he:"הגולן",tr:"hаГолан",ru:"Голаны",cat:"География",les:3},
+  {he:"ים המלח",tr:"Ям hаМелах",ru:"Мёртвое море",cat:"География",les:3},
+  // Урок 4
+  {he:"ארץ",tr:"эрец",ru:"страна",cat:"Существительные",les:4},
+  {he:"מיץ",tr:"миц",ru:"сок",cat:"Существительные",les:4},
+  {he:"מסעדה",tr:"мисъада",ru:"ресторан",cat:"Существительные",les:4},
+  {he:"עוגה",tr:"уга",ru:"торт, кекс",cat:"Существительные",les:4},
+  {he:"עיר",tr:"ир",ru:"город",cat:"Существительные",les:4},
+  {he:"סרט",tr:"серет",ru:"фильм",cat:"Существительные",les:4},
+  {he:"רגע",tr:"рега",ru:"момент",cat:"Существительные",les:4},
+  {he:"רוסית",tr:"русит",ru:"русский язык",cat:"Существительные",les:4},
+  {he:"אנחנו",tr:"анахну",ru:"мы",cat:"Местоимения",les:4},
+  {he:"הוא",tr:"hу",ru:"он",cat:"Местоимения",les:4},
+  {he:"לאן",tr:"леан",ru:"куда?",cat:"Вопросительные",les:4},
+  {he:"עושה",tr:"осэ",ru:"делает",cat:"Глаголы",les:4},
+  {he:"רוצה",tr:"роцэ",ru:"хочет",cat:"Глаголы",les:4},
+  {he:"שותה",tr:"шотэ",ru:"пьёт",cat:"Глаголы",les:4},
+  {he:"ל...",tr:"ле",ru:"к, для",cat:"Служебные",les:4},
+  {he:"עם",tr:"им",ru:"с",cat:"Служебные",les:4},
+  {he:"אולי",tr:"улай",ru:"может быть",cat:"Разное",les:4},
+  {he:"מה נשמע",tr:"ма нишма",ru:"как дела?",cat:"Разное",les:4},
+  {he:"מצוין",tr:"мецуян",ru:"прекрасно",cat:"Разное",les:4},
+  {he:"נעים מאוד",tr:"наим меод",ru:"очень приятно",cat:"Разное",les:4},
+  {he:"סליחה",tr:"слиха",ru:"извините",cat:"Разное",les:4},
+  {he:"לעשות חיים",tr:"лаасот хаим",ru:"веселиться",cat:"Разное",les:4},
+  {he:"קצת",tr:"кцат",ru:"немного",cat:"Разное",les:4},
+  {he:"רק",tr:"рак",ru:"только",cat:"Разное",les:4},
+  {he:"ירושלים",tr:"Йерушалаим",ru:"Иерусалим",cat:"География",les:4},
+  // Урок 5
+  {he:"אבא",tr:"аба",ru:"отец",cat:"Существительные",les:5},
+  {he:"אולפן",tr:"ульпан",ru:"ульпан (курсы)",cat:"Существительные",les:5},
+  {he:"אשכולית",tr:"эшколит",ru:"грейпфрут",cat:"Существительные",les:5},
+  {he:"בית",tr:"баит",ru:"дом",cat:"Существительные",les:5},
+  {he:"יפנית",tr:"япанит",ru:"японский язык",cat:"Существительные",les:5},
+  {he:"כיתה",tr:"кита",ru:"класс, классная комната",cat:"Существительные",les:5},
+  {he:"משפחה",tr:"мишпаха",ru:"семья",cat:"Существительные",les:5},
+  {he:"עולם",tr:"олам",ru:"мир",cat:"Существительные",les:5},
+  {he:"פולנית",tr:"поланит",ru:"польский язык",cat:"Существительные",les:5},
+  {he:"פורטוגזית",tr:"португезит",ru:"португальский язык",cat:"Существительные",les:5},
+  {he:"תפוז",tr:"тапуз",ru:"апельсин",cat:"Существительные",les:5},
+  {he:"ב...",tr:"бэ",ru:"в",cat:"Служебные",les:5},
+  {he:"ליד",tr:"леяд",ru:"у, около",cat:"Служебные",les:5},
+  {he:"על",tr:"аль",ru:"о, про",cat:"Служебные",les:5},
+  {he:"מדבר",tr:"медабер",ru:"разговаривает",cat:"Глаголы",les:5},
+  {he:"אין",tr:"эйн",ru:"нет, нету",cat:"Разное",les:5},
+  {he:"בסדר",tr:"бэседер",ru:"всё в порядке",cat:"Разное",les:5},
+  {he:"הכל",tr:"hаколь",ru:"всё",cat:"Разное",les:5},
+  {he:"הרבה",tr:"hарбэ",ru:"много",cat:"Разное",les:5},
+  {he:"יש",tr:"еш",ru:"есть, имеется",cat:"Разное",les:5},
+  {he:"כל העולם",tr:"коль hаолам",ru:"весь мир",cat:"Разное",les:5},
+  {he:"כן",tr:"кен",ru:"да",cat:"Разное",les:5},
+  {he:"פה",tr:"по",ru:"здесь",cat:"Разное",les:5},
+  {he:"בת ים",tr:"Бат-Ям",ru:"Бат-Ям",cat:"География",les:5},
+  // Урок 6
+  {he:"חלב",tr:"халав",ru:"молоко",cat:"Существительные",les:6},
+  {he:"מחשב",tr:"махшев",ru:"компьютер",cat:"Существительные",les:6},
+  {he:"מכתב",tr:"михтав",ru:"письмо",cat:"Существительные",les:6},
+  {he:"מלון",tr:"малон",ru:"гостиница, отель",cat:"Существительные",les:6},
+  {he:"ספר",tr:"сефер",ru:"книга",cat:"Существительные",les:6},
+  {he:"ספרדית",tr:"сфарадит",ru:"испанский язык",cat:"Существительные",les:6},
+  {he:"ערבית",tr:"аравит",ru:"арабский язык",cat:"Существительные",les:6},
+  {he:"צרפתית",tr:"царфатит",ru:"французский язык",cat:"Существительные",les:6},
+  {he:"שיעור",tr:"шиур",ru:"урок",cat:"Существительные",les:6},
+  {he:"בבקשה",tr:"бэвакаша",ru:"пожалуйста",cat:"Разное",les:6},
+  {he:"בוקר טוב",tr:"бокер тов",ru:"доброе утро",cat:"Разное",les:6},
+  {he:"ברוך השם",tr:"барух hашем",ru:"слава Богу",cat:"Разное",les:6},
+  {he:"ברוכים הבאים",tr:"брухим hабаим",ru:"добро пожаловать",cat:"Разное",les:6},
+  {he:"דרישת שלום",tr:"дришат шалом",ru:"передать привет",cat:"Разное",les:6},
+  {he:"הכנסת",tr:"hаКнесет",ru:"кнессет",cat:"Разное",les:6},
+  {he:"טוב",tr:"тов",ru:"хорошо",cat:"Разное",les:6},
+  {he:"יופי",tr:"йофи",ru:"прекрасно!",cat:"Разное",les:6},
+  {he:"מאוד",tr:"меод",ru:"очень",cat:"Разное",les:6},
+  {he:"מה שלומך",tr:"ма шломха",ru:"как поживаешь? (м.р.)",cat:"Разное",les:6},
+  {he:"מה שלומך",tr:"ма шломех",ru:"как поживаешь? (ж.р.)",cat:"Разное",les:6},
+  {he:"עכשיו",tr:"ахшав",ru:"теперь, сейчас",cat:"Разное",les:6},
+  {he:"ערב טוב",tr:"эрев тов",ru:"добрый вечер",cat:"Разное",les:6},
+  {he:"איפה",tr:"эйфо",ru:"где?",cat:"Вопросительные",les:6},
+  {he:"אבל",tr:"аваль",ru:"но",cat:"Служебные",les:6},
+  {he:"אוהב",tr:"оhев",ru:"любит",cat:"Глаголы",les:6},
+  {he:"בא",tr:"ба",ru:"приходит",cat:"Глаголы",les:6},
+  {he:"הולך",tr:"hолех",ru:"идёт, ходит",cat:"Глаголы",les:6},
+  {he:"כותב",tr:"котев",ru:"пишет",cat:"Глаголы",les:6},
+  {he:"קורא",tr:"корэ",ru:"читает",cat:"Глаголы",les:6},
+  {he:"חיפה",tr:"Хайфа",ru:"Хайфа",cat:"География",les:6},
+  {he:"יפו",tr:"Яфо",ru:"Яффо",cat:"География",les:6},
+  {he:"תל אביב",tr:"Тель-Авив",ru:"Тель-Авив",cat:"География",les:6},
+  // Урок 7
+  {he:"אחת",tr:"ахат",ru:"одна (ж.р.)",cat:"Числительные",les:7},
+  {he:"שתיים",tr:"штаим",ru:"две",cat:"Числительные",les:7},
+  {he:"שלוש",tr:"шалош",ru:"три",cat:"Числительные",les:7},
+  {he:"ארבע",tr:"арба",ru:"четыре",cat:"Числительные",les:7},
+  {he:"חמש",tr:"хамеш",ru:"пять",cat:"Числительные",les:7},
+  {he:"שש",tr:"шеш",ru:"шесть",cat:"Числительные",les:7},
+  {he:"שבע",tr:"шева",ru:"семь",cat:"Числительные",les:7},
+  {he:"שמונה",tr:"шмонэ",ru:"восемь",cat:"Числительные",les:7},
+  {he:"תשע",tr:"тэша",ru:"девять",cat:"Числительные",les:7},
+  {he:"עשר",tr:"эсэр",ru:"десять",cat:"Числительные",les:7},
+  {he:"אחת עשרה",tr:"ахат-эсрэ",ru:"одиннадцать",cat:"Числительные",les:7},
+  {he:"שתים עשרה",tr:"штэйм-эсрэ",ru:"двенадцать",cat:"Числительные",les:7},
+  {he:"יודע",tr:"йодеа",ru:"знает",cat:"Глаголы",les:7},
+  {he:"חדשות",tr:"хадашот",ru:"новости",cat:"Существительные",les:7},
+  {he:"חצי",tr:"хеци",ru:"половина",cat:"Существительные",les:7},
+  {he:"רבע",tr:"рева",ru:"четверть",cat:"Существительные",les:7},
+  {he:"שעה",tr:"шаа",ru:"час",cat:"Существительные",les:7},
+  {he:"שעון",tr:"шаон",ru:"часы",cat:"Существительные",les:7},
+  {he:"שקט",tr:"шекет",ru:"тишина, покой",cat:"Существительные",les:7},
+  {he:"אז",tr:"аз",ru:"тогда",cat:"Разное",les:7},
+  {he:"איזה מזל",tr:"эйзэ мазаль",ru:"какая удача!",cat:"Разное",les:7},
+  {he:"מה השעה",tr:"ма hашаа",ru:"который час?",cat:"Разное",les:7},
+  // Урок 8
+  {he:"חבר, חברה",tr:"хавер, хавера",ru:"друг, подруга",cat:"Существительные",les:8},
+  {he:"משנה",tr:"мишна",ru:"Мишна",cat:"Существительные",les:8},
+  {he:"קיבוץ",tr:"кибуц",ru:"кибуц",cat:"Существительные",les:8},
+  {he:"שבת",tr:"шабат",ru:"суббота",cat:"Существительные",les:8},
+  {he:"תלמוד",tr:"талмуд",ru:"Талмуд",cat:"Существительные",les:8},
+  {he:"תנ\"ך",tr:"танах",ru:"Танах (Библия)",cat:"Существительные",les:8},
+  {he:"אשדוד",tr:"Ашдод",ru:"Ашдод",cat:"География",les:8},
+  {he:"אשקלון",tr:"Ашкелон",ru:"Ашкелон",cat:"География",les:8},
+  {he:"באר שבע",tr:"Беэр-Шева",ru:"Беэр-Шева",cat:"География",les:8},
+  {he:"צפת",tr:"Цфат",ru:"Цфат",cat:"География",les:8},
+  {he:"הגליל",tr:"hаГалиль",ru:"Галилея",cat:"География",les:8},
+  {he:"כולם",tr:"кулам",ru:"все",cat:"Разное",les:8},
+  // Урок 9
+  {he:"אפס",tr:"эфес",ru:"ноль",cat:"Существительные",les:9},
+  {he:"בוקר",tr:"бокер",ru:"утро",cat:"Существительные",les:9},
+  {he:"חנות",tr:"ханут",ru:"магазин",cat:"Существительные",les:9},
+  {he:"לחמנייה",tr:"лахмания",ru:"булочка",cat:"Существительные",les:9},
+  {he:"לילה",tr:"лайла",ru:"ночь",cat:"Существительные",les:9},
+  {he:"מספר",tr:"миспар",ru:"число",cat:"Существительные",les:9},
+  {he:"ספרייה",tr:"сифрия",ru:"библиотека",cat:"Существительные",les:9},
+  {he:"עבודה",tr:"авода",ru:"работа",cat:"Существительные",les:9},
+  {he:"ערב",tr:"эрев",ru:"вечер",cat:"Существительные",les:9},
+  {he:"צהריים",tr:"цаhораим",ru:"полдень",cat:"Существительные",les:9},
+  {he:"רחוב",tr:"рехов",ru:"улица",cat:"Существительные",les:9},
+  {he:"שירותים",tr:"шерутим",ru:"туалет",cat:"Существительные",les:9},
+  {he:"אומר",tr:"омер",ru:"говорит",cat:"Глаголы",les:9},
+  {he:"מבין",tr:"мевин",ru:"понимает",cat:"Глаголы",les:9},
+  {he:"מצטער",tr:"мицтаэр",ru:"сожалеет",cat:"Глаголы",les:9},
+  {he:"נוסע",tr:"носеа",ru:"едет",cat:"Глаголы",les:9},
+  {he:"עובד",tr:"овед",ru:"работает",cat:"Глаголы",les:9},
+  {he:"קונה",tr:"конэ",ru:"покупает",cat:"Глаголы",les:9},
+  {he:"שומע",tr:"шомеа",ru:"слышит",cat:"Глаголы",les:9},
+  {he:"ציבורי, ציבורית",tr:"цибури, цибурит",ru:"общественный/ая",cat:"Прилагательные",les:9},
+  {he:"אין דבר",tr:"эйн давар",ru:"неважно",cat:"Разное",les:9},
+  {he:"בטח",tr:"бетах",ru:"конечно",cat:"Разное",les:9},
+  {he:"גם וגם",tr:"гам вэгам",ru:"и то и это",cat:"Разное",les:9},
+  {he:"ימינה",tr:"ямина",ru:"направо",cat:"Разное",les:9},
+  {he:"ישר",tr:"яшар",ru:"прямо",cat:"Разное",les:9},
+  {he:"מודיעין",tr:"модиин",ru:"информация (справочная)",cat:"Разное",les:9},
+  {he:"נכון",tr:"нахон",ru:"правильно, верно",cat:"Разное",les:9},
+  {he:"שמאלה",tr:"смола",ru:"налево",cat:"Разное",les:9},
+  {he:"שתי",tr:"штэй",ru:"два (ж.р., сопряж.)",cat:"Числительные",les:9},
+  {he:"איך",tr:"эйх",ru:"как?",cat:"Вопросительные",les:9},
+  {he:"כמה",tr:"кама",ru:"сколько?",cat:"Вопросительные",les:9},
+  {he:"מתי",tr:"матай",ru:"когда?",cat:"Вопросительные",les:9},
+  // Урок 10
+  {he:"אהבה",tr:"аhава",ru:"любовь",cat:"Существительные",les:10},
+  {he:"ארמון",tr:"армон",ru:"замок, дворец",cat:"Существительные",les:10},
+  {he:"בחור, בחורה",tr:"бахур, бахура",ru:"парень, девушка",cat:"Существительные",les:10},
+  {he:"גינה",tr:"гина",ru:"сад",cat:"Существительные",les:10},
+  {he:"דירה",tr:"дира",ru:"квартира",cat:"Существительные",les:10},
+  {he:"חדר",tr:"хедер",ru:"комната",cat:"Существительные",les:10},
+  {he:"חנוכייה",tr:"ханукия",ru:"ханукальный светильник",cat:"Существительные",les:10},
+  {he:"מחברת",tr:"махберет",ru:"тетрадь",cat:"Существительные",les:10},
+  {he:"מטבח",tr:"митбах",ru:"кухня",cat:"Существительные",les:10},
+  {he:"מקלחת",tr:"миклахат",ru:"душ",cat:"Существительные",les:10},
+  {he:"עץ",tr:"эц",ru:"дерево",cat:"Существительные",les:10},
+  {he:"ציור",tr:"циур",ru:"картина, рисунок",cat:"Существительные",les:10},
+  {he:"שולחן",tr:"шульхан",ru:"стол",cat:"Существительные",les:10},
+  {he:"גדול, גדולה",tr:"гадоль, гдола",ru:"большой/ая",cat:"Прилагательные",les:10},
+  {he:"חדש, חדשה",tr:"хадаш, хадаша",ru:"новый/ая",cat:"Прилагательные",les:10},
+  {he:"טוב, טובה",tr:"тов, това",ru:"хороший/ая",cat:"Прилагательные",les:10},
+  {he:"יפה, יפה",tr:"яфэ, яфа",ru:"красивый/ая",cat:"Прилагательные",les:10},
+  {he:"ישן, ישנה",tr:"яшан, йешана",ru:"старый/ая, старинный",cat:"Прилагательные",les:10},
+  {he:"מיוחד, מיוחדת",tr:"меюхад, меюхедет",ru:"специальный, особенный",cat:"Прилагательные",les:10},
+  {he:"מצוין, מצוינת",tr:"мецуян, мецуенет",ru:"отличный/ая",cat:"Прилагательные",les:10},
+  {he:"נחמד, נחמדה",tr:"нэхмад, нэхмада",ru:"приятный/ая",cat:"Прилагательные",les:10},
+  {he:"עתיק, עתיקה",tr:"атик, атика",ru:"древний/яя",cat:"Прилагательные",les:10},
+  {he:"קטן, קטנה",tr:"катан, ктана",ru:"маленький/ая",cat:"Прилагательные",les:10},
+  {he:"איזה",tr:"эйзэ",ru:"какой?",cat:"Вопросительные",les:10},
+  {he:"איזו",tr:"эйзо",ru:"какая?",cat:"Вопросительные",les:10},
+  {he:"אילו",tr:"эйлу",ru:"какие?",cat:"Вопросительные",les:10},
+  {he:"בקשר ל",tr:"бэкешер ле",ru:"насчёт, что касается",cat:"Разное",les:10},
+  {he:"כמו",tr:"кмо",ru:"как (подобно)",cat:"Разное",les:10},
+  {he:"למשל",tr:"лемашаль",ru:"например",cat:"Разное",les:10},
+  {he:"לפעמים",tr:"лифамим",ru:"иногда",cat:"Разное",les:10},
+  {he:"על שם",tr:"аль шем",ru:"названный в честь",cat:"Разное",les:10},
+  // Урок 11
+  {he:"אוהל",tr:"оhель",ru:"палатка",cat:"Существительные",les:11},
+  {he:"אכסניה",tr:"ахсания",ru:"гостиница (хостел)",cat:"Существительные",les:11},
+  {he:"בית כנסת",tr:"бейт кнесет",ru:"синагога",cat:"Существительные",les:11},
+  {he:"גבר",tr:"гевер",ru:"мужчина",cat:"Существительные",les:11},
+  {he:"דקה",tr:"дака",ru:"минута",cat:"Существительные",les:11},
+  {he:"יום",tr:"йом",ru:"день",cat:"Существительные",les:11},
+  {he:"כיסא",tr:"кисэ",ru:"стул",cat:"Существительные",les:11},
+  {he:"מיטה",tr:"мита",ru:"кровать",cat:"Существительные",les:11},
+  {he:"מילה",tr:"мила",ru:"слово",cat:"Существительные",les:11},
+  {he:"מקום",tr:"маком",ru:"место",cat:"Существительные",les:11},
+  {he:"פיתה",tr:"пита",ru:"пита",cat:"Существительные",les:11},
+  {he:"רהיט",tr:"раhит",ru:"мебель",cat:"Существительные",les:11},
+  {he:"שטיח",tr:"шатиах",ru:"ковёр",cat:"Существительные",les:11},
+  {he:"שקל",tr:"шекель",ru:"шекель",cat:"Существительные",les:11},
+  {he:"אוכל",tr:"охель",ru:"ест",cat:"Глаголы",les:11},
+  {he:"יושב",tr:"йошев",ru:"сидит",cat:"Глаголы",les:11},
+  {he:"מטייל",tr:"метаель",ru:"гуляет",cat:"Глаголы",les:11},
+  {he:"עולה",tr:"олэ",ru:"стоит (о цене)",cat:"Глаголы",les:11},
+  {he:"אחר, אחרת",tr:"ахер, ахерет",ru:"другой, иной",cat:"Прилагательные",les:11},
+  {he:"בשרי, בשרית",tr:"бсари, бсарит",ru:"мясной/ая",cat:"Прилагательные",les:11},
+  {he:"חלבי, חלבית",tr:"халави, халавит",ru:"молочный/ая",cat:"Прилагательные",les:11},
+  {he:"ישראלי, ישראלית",tr:"исраэли, исраэлит",ru:"израильский/ая",cat:"Прилагательные",les:11},
+  {he:"אחד",tr:"эхад",ru:"один (м.р.)",cat:"Числительные",les:11},
+  {he:"שניים",tr:"шнаим",ru:"два",cat:"Числительные",les:11},
+  {he:"שלושה",tr:"шлоша",ru:"три",cat:"Числительные",les:11},
+  {he:"ארבעה",tr:"арбаа",ru:"четыре",cat:"Числительные",les:11},
+  {he:"חמישה",tr:"хамиша",ru:"пять",cat:"Числительные",les:11},
+  {he:"שישה",tr:"шиша",ru:"шесть",cat:"Числительные",les:11},
+  {he:"שבעה",tr:"шива",ru:"семь",cat:"Числительные",les:11},
+  {he:"שמונה",tr:"шмона",ru:"восемь",cat:"Числительные",les:11},
+  {he:"תשעה",tr:"тиша",ru:"девять",cat:"Числительные",les:11},
+  {he:"עשרה",tr:"асара",ru:"десять",cat:"Числительные",les:11},
+  {he:"אלף",tr:"элеф",ru:"тысяча",cat:"Числительные",les:11},
+  {he:"חמישים",tr:"хамишим",ru:"пятьдесят",cat:"Числительные",les:11},
+  {he:"מאה",tr:"меа",ru:"сто",cat:"Числительные",les:11},
+  {he:"תשעים",tr:"тишим",ru:"девяносто",cat:"Числительные",les:11},
+  {he:"כל",tr:"коль",ru:"все, каждый, любой",cat:"Разное",les:11},
+  {he:"משהו",tr:"машеху",ru:"что-то",cat:"Разное",les:11},
+  {he:"עוד",tr:"од",ru:"ещё",cat:"Разное",les:11},
+  {he:"תודה רבה",tr:"тода раба",ru:"большое спасибо",cat:"Разное",les:11},
+  // Урок 12
+  {he:"דוד, דודה",tr:"дод, дода",ru:"дядя, тётя",cat:"Существительные",les:12},
+  {he:"כסף",tr:"кесеф",ru:"деньги",cat:"Существительные",les:12},
+  {he:"מוכר, מוכרת",tr:"мохер, мохерет",ru:"продавец, продавщица",cat:"Существительные",les:12},
+  {he:"עיתון",tr:"итон",ru:"газета",cat:"Существительные",les:12},
+  {he:"שבוע",tr:"шавуа",ru:"неделя",cat:"Существительные",les:12},
+  {he:"תיק",tr:"тик",ru:"сумка, папка",cat:"Существительные",les:12},
+  {he:"מחפש",tr:"мехапес",ru:"ищет",cat:"Глаголы",les:12},
+  {he:"מכיר",tr:"макир",ru:"знает, знаком",cat:"Глаголы",les:12},
+  {he:"פוגש",tr:"погеш",ru:"встречает",cat:"Глаголы",les:12},
+  {he:"רואה",tr:"роэ",ru:"видит",cat:"Глаголы",les:12},
+  {he:"זול, זולה",tr:"золь, зола",ru:"дешёвый/ая",cat:"Прилагательные",les:12},
+  {he:"נכון, נכונה",tr:"нахон, нехона",ru:"верный, правильный",cat:"Прилагательные",les:12},
+  {he:"את",tr:"эт",ru:"частица прямого дополнения",cat:"Разное",les:12},
+  {he:"היום",tr:"hайом",ru:"сегодня",cat:"Разное",les:12},
+  {he:"הכותל המערבי",tr:"hаКотель hаМаарави",ru:"Стена Плача",cat:"Разное",les:12},
+  {he:"זהו",tr:"зэhу",ru:"вот именно",cat:"Разное",les:12},
+  {he:"מחר",tr:"махар",ru:"завтра",cat:"Разное",les:12},
+  {he:"יום ראשון",tr:"йом ришон",ru:"воскресенье",cat:"Дни недели",les:12},
+  {he:"יום שני",tr:"йом шени",ru:"понедельник",cat:"Дни недели",les:12},
+  {he:"יום שלישי",tr:"йом шлиши",ru:"вторник",cat:"Дни недели",les:12},
+  {he:"יום רביעי",tr:"йом ревии",ru:"среда",cat:"Дни недели",les:12},
+  {he:"יום חמישי",tr:"йом хамиши",ru:"четверг",cat:"Дни недели",les:12},
+  {he:"יום שישי",tr:"йом шиши",ru:"пятница",cat:"Дни недели",les:12},
+  {he:"אהלן",tr:"аhалан",ru:"привет! (сленг)",cat:"Разное",les:12},
+  // Урок 13
+  {he:"אלף בית",tr:"алеф-бет",ru:"алфавит",cat:"Существительные",les:13},
+  {he:"בגד",tr:"бегед",ru:"одежда",cat:"Существительные",les:13},
+  {he:"בעל",tr:"бааль",ru:"муж",cat:"Существительные",les:13},
+  {he:"גניזה",tr:"гниза",ru:"архив (гениза)",cat:"Существительные",les:13},
+  {he:"זמן",tr:"зман",ru:"время",cat:"Существительные",les:13},
+  {he:"יהודי, יהודייה",tr:"йеhуди, йеhудия",ru:"еврей, еврейка",cat:"Существительные",les:13},
+  {he:"מאה",tr:"меа",ru:"сто (сотня)",cat:"Существительные",les:13},
+  {he:"רב",tr:"рав",ru:"раввин",cat:"Существительные",les:13},
+  {he:"שם",tr:"шем",ru:"имя",cat:"Существительные",les:13},
+  {he:"חושב",tr:"хошев",ru:"думает",cat:"Глаголы",les:13},
+  {he:"לובש",tr:"ловеш",ru:"одевает(ся)",cat:"Глаголы",les:13},
+  {he:"רץ",tr:"рац",ru:"бежит, бегает",cat:"Глаголы",les:13},
+  {he:"שואל",tr:"шоэль",ru:"спрашивает",cat:"Глаголы",les:13},
+  {he:"בשקט",tr:"бэшекет",ru:"спокойно, тихо",cat:"Разное",les:13},
+  {he:"ועוד",tr:"вэод",ru:"ещё, и более",cat:"Разное",les:13},
+  {he:"לאט",tr:"леат",ru:"медленно",cat:"Разное",les:13},
+  {he:"מהר",tr:"маэр",ru:"быстро",cat:"Разное",les:13},
+  {he:"מישהו",tr:"мишеху",ru:"кто-то",cat:"Разное",les:13},
+  {he:"קשה",tr:"кашэ",ru:"тяжёлый, трудный",cat:"Разное",les:13},
+  {he:"מה שמך",tr:"ма шмех",ru:"как тебя зовут? (ж.р.)",cat:"Разное",les:13},
+  {he:"מה שמך",tr:"ма шимха",ru:"как тебя зовут? (м.р.)",cat:"Разное",les:13},
+  {he:"שמי",tr:"шми",ru:"моё имя",cat:"Разное",les:13},
+];
+const ALL = THEME.map(w=>Object.assign({},w,{src:"Тема"}))
+  .concat(LESSONS.map(w=>Object.assign({},w,{src:"Урок "+w.les})));
+const THEME_CATS = ["Все","Квартира","Город","Предлоги","Аренда","Прилагательные"];
 
-/* ---------- состояние ---------- */
-const CATS = ["Все","Квартира","Город","Предлоги","Аренда","Прилагательные"];
-let activeCat = "Все";
-let mode = "flash";           // flash | quiz
-let heToRu = true;            // направление
-let deck = [];
-let idx = 0;
-let viewed = new Set();
-let score = {right:0, total:0};
-let quizCur = null, quizAnswered = false;
+/* ===== состояние ===== */
+let section="theme";   // theme | lessons | search
+let mode="flash";      // flash | quiz | list
+let heToRu=true;
+let themeCat="Все";
+let lessonSel="all";
+let lessonCat="Все";
+let query="";
+let deck=[], idx=0, viewed=new Set(), score={right:0,total:0};
+let quizAnswered=false;
 
-const $ = id => document.getElementById(id);
-const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+const $=id=>document.getElementById(id);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;};
 
+/* ===== пул слов текущего раздела ===== */
+function pool(){
+  if(section==="theme") return themeCat==="Все"?THEME:THEME.filter(w=>w.cat===themeCat);
+  if(section==="lessons"){
+    let p = lessonSel==="all"?LESSONS:LESSONS.filter(w=>w.les===+lessonSel);
+    if(lessonCat!=="Все") p=p.filter(w=>w.cat===lessonCat);
+    return p;
+  }
+  return [];
+}
 function buildDeck(){
-  const pool = activeCat==="Все" ? WORDS : WORDS.filter(w=>w.cat===activeCat);
-  deck = shuffle(pool);
-  idx = 0;
-  $("stTotal").textContent = deck.length;
-  $("len").textContent = deck.length;
+  deck=shuffle(pool()); idx=0;
+  $("stTotal").textContent=deck.length;
+  $("len").textContent=deck.length;
 }
 
-/* ---------- категории ---------- */
+/* ===== категории темы ===== */
 function renderCats(){
-  const box = $("cats");
-  box.innerHTML = "";
-  CATS.forEach(c=>{
-    const b = document.createElement("button");
-    b.className = "chip cat";
-    b.textContent = c;
-    b.setAttribute("aria-pressed", c===activeCat);
-    b.onclick = ()=>{ activeCat=c; renderCats(); buildDeck(); viewed.clear(); updateStats();
-      if(mode==="flash") render(); else if(mode==="quiz") newQuestion(); else renderList(); };
+  const box=$("cats"); box.innerHTML="";
+  THEME_CATS.forEach(c=>{
+    const b=document.createElement("button");
+    b.className="chip cat"; b.textContent=c;
+    b.setAttribute("aria-pressed",c===themeCat);
+    b.onclick=()=>{themeCat=c;renderCats();buildDeck();refresh();};
     box.appendChild(b);
   });
 }
 
-/* ---------- карточки ---------- */
+/* ===== карточки ===== */
 function render(){
-  if(mode!=="flash") return;
-  const w = deck[idx];
-  if(!w) return;
-  const card = $("card");
-  card.classList.remove("flipped");
-  const front = heToRu
-    ? `<div class="he" dir="rtl">${w.he}</div>`
-    : `<div class="ru">${w.ru}</div>`;
-  const back = heToRu
-    ? `<div class="ru">${w.ru}</div><div class="translit">${w.tr}</div>`
-    : `<div class="he" dir="rtl">${w.he}</div><div class="translit">${w.tr}</div>`;
-  $("fFront").innerHTML = front;
-  $("fBack").innerHTML = back;
-  $("fCat").textContent = w.cat;
-  $("bCat").textContent = w.cat;
-  $("fGen").textContent = w.g || "";
-  $("pos").textContent = idx+1;
-  viewed.add(w.he);
-  updateStats();
+  const w=deck[idx];
+  const card=$("card"); card.classList.remove("flipped");
+  if(!w){$("fFront").innerHTML='<div class="ru" style="color:var(--muted);font-size:20px">Нет слов</div>';$("fBack").innerHTML="";$("fCat").textContent="";$("bCat").textContent="";$("fGen").textContent="";$("pos").textContent=0;return;}
+  const front=heToRu?`<div class="he" dir="rtl">${w.he}</div>`:`<div class="ru">${w.ru}</div>`;
+  const back=heToRu?`<div class="ru">${w.ru}</div><div class="translit">${w.tr}</div>`
+                   :`<div class="he" dir="rtl">${w.he}</div><div class="translit">${w.tr}</div>`;
+  $("fFront").innerHTML=front; $("fBack").innerHTML=back;
+  const label=w.les?("Урок "+w.les+" · "+w.cat):w.cat;
+  $("fCat").textContent=label; $("bCat").textContent=label;
+  $("fGen").textContent=w.g||"";
+  $("pos").textContent=idx+1;
+  viewed.add(w.he); updateStats();
 }
-function flip(){ $("card").classList.toggle("flipped"); }
-function next(){ if(idx<deck.length-1){idx++; render();} }
-function prev(){ if(idx>0){idx--; render();} }
+function flip(){$("card").classList.toggle("flipped");}
+function next(){if(idx<deck.length-1){idx++;render();}}
+function prev(){if(idx>0){idx--;render();}}
 
-/* ---------- тест ---------- */
+/* ===== тест ===== */
 function newQuestion(){
-  quizAnswered = false;
-  $("qFeedback").innerHTML = "";
-  $("qNext").disabled = true;
-  const correct = deck[Math.random()*deck.length|0];
-  quizCur = correct;
-  const pool = (activeCat==="Все"?WORDS:WORDS.filter(w=>w.cat===activeCat));
-  const distract = shuffle(pool.filter(w=>w.ru!==correct.ru)).slice(0,3);
-  const options = shuffle([correct, ...distract]);
-
-  $("qAsk").textContent = heToRu ? "Что это значит?" : "Как это на иврите?";
-  $("qPrompt").innerHTML = heToRu
-    ? `<div class="he" dir="rtl">${correct.he}</div><div class="translit">${correct.tr}</div>`
-    : `<div class="ru" style="font-size:clamp(28px,8vw,40px)">${correct.ru}</div>`;
-
-  const box = $("qOpts");
-  box.innerHTML = "";
+  quizAnswered=false; $("qFeedback").innerHTML=""; $("qNext").disabled=true;
+  const p=pool();
+  if(p.length<2){$("qPrompt").innerHTML='<div class="ru" style="color:var(--muted);font-size:18px">Недостаточно слов для теста</div>';$("qOpts").innerHTML="";return;}
+  const correct=p[Math.random()*p.length|0];
+  const distract=shuffle(p.filter(w=>w.ru!==correct.ru)).slice(0,3);
+  const options=shuffle([correct,...distract]);
+  $("qAsk").textContent=heToRu?"Что это значит?":"Как это на иврите?";
+  $("qPrompt").innerHTML=heToRu?`<div class="he" dir="rtl">${correct.he}</div><div class="translit">${correct.tr}</div>`
+                               :`<div class="ru" style="font-size:clamp(26px,7vw,38px)">${correct.ru}</div>`;
+  const box=$("qOpts"); box.innerHTML="";
   options.forEach(o=>{
-    const b = document.createElement("button");
-    b.className = "opt " + (heToRu ? "ru" : "he");
-    if(!heToRu) b.dir = "rtl";
-    b.innerHTML = heToRu ? o.ru : o.he;
-    b.onclick = ()=>answer(b, o, correct);
+    const b=document.createElement("button");
+    b.className="opt "+(heToRu?"ru":"he"); if(!heToRu)b.dir="rtl";
+    b.innerHTML=heToRu?o.ru:o.he;
+    b.onclick=()=>answer(b,o,correct);
     box.appendChild(b);
   });
 }
-function answer(btn, chosen, correct){
-  if(quizAnswered) return;
-  quizAnswered = true;
-  score.total++;
-  const buttons = [...$("qOpts").children];
-  const isRight = chosen.ru===correct.ru;
-  if(isRight) score.right++;
-  buttons.forEach(b=>{
-    b.disabled = true;
-    const label = heToRu ? b.textContent : b.textContent;
-    const matchCorrect = heToRu ? (b.textContent===correct.ru) : (b.textContent===correct.he);
-    if(matchCorrect) b.classList.add("correct");
+function answer(btn,chosen,correct){
+  if(quizAnswered)return; quizAnswered=true; score.total++;
+  const isRight=chosen.ru===correct.ru; if(isRight)score.right++;
+  [...$("qOpts").children].forEach(b=>{
+    b.disabled=true;
+    const ok=heToRu?(b.textContent===correct.ru):(b.textContent===correct.he);
+    if(ok)b.classList.add("correct");
   });
-  if(!isRight) btn.classList.add("wrong");
-  $("qFeedback").innerHTML = isRight
-    ? `Верно · <b>${correct.he}</b> — ${correct.tr}`
-    : `Правильно: <b>${correct.he}</b> — ${correct.tr} (${correct.ru})`;
-  $("qNext").disabled = false;
-  updateStats();
+  if(!isRight)btn.classList.add("wrong");
+  $("qFeedback").innerHTML=isRight?`Верно · <b>${correct.he}</b> — ${correct.tr}`
+                                  :`Правильно: <b>${correct.he}</b> — ${correct.tr} (${correct.ru})`;
+  $("qNext").disabled=false; updateStats();
 }
 
-/* ---------- общее ---------- */
-function updateStats(){
-  $("stViewed").textContent = viewed.size;
-  $("stScore").textContent = `${score.right}/${score.total}`;
-}
-function setMode(m){
-  mode = m;
-  $("mFlash").setAttribute("aria-pressed", m==="flash");
-  $("mQuiz").setAttribute("aria-pressed", m==="quiz");
-  $("mList").setAttribute("aria-pressed", m==="list");
-  $("flashView").style.display = m==="flash" ? "" : "none";
-  $("quizView").style.display = m==="quiz" ? "block" : "none";
-  $("listView").style.display = m==="list" ? "block" : "none";
-  if(m==="flash") render();
-  else if(m==="quiz") newQuestion();
-  else renderList();
-}
+/* ===== список ===== */
 function renderList(){
-  const pool = activeCat==="Все" ? WORDS : WORDS.filter(w=>w.cat===activeCat);
-  $("listTitle").textContent = activeCat==="Все" ? "Все слова" : activeCat;
-  $("listCount").textContent = pool.length + " слов";
-  const box = $("listBox");
-  box.innerHTML = "";
-  let lastCat = null;
-  pool.forEach(w=>{
-    if(activeCat==="Все" && w.cat!==lastCat){
-      lastCat = w.cat;
-      const sep = document.createElement("div");
-      sep.className = "list-sep";
-      sep.textContent = w.cat;
-      box.appendChild(sep);
+  const p=pool();
+  let title="Все слова";
+  if(section==="lessons"){
+    title = (lessonSel==="all"?"Все уроки":"Урок "+lessonSel) + (lessonCat!=="Все"?" · "+lessonCat:"");
+  } else { title = themeCat==="Все"?"Тема — все слова":themeCat; }
+  $("listTitle").textContent=title;
+  $("listCount").textContent=p.length+" слов";
+  const box=$("listBox"); box.innerHTML="";
+  let lastKey=null;
+  p.forEach(w=>{
+    const key = section==="lessons" ? (lessonSel==="all"?("Урок "+w.les):w.cat) : w.cat;
+    const showSep = section==="theme" ? (themeCat==="Все") : (lessonSel==="all" || lessonCat==="Все");
+    if(showSep && key!==lastKey){
+      lastKey=key;
+      const sep=document.createElement("div"); sep.className="list-sep"; sep.textContent=key; box.appendChild(sep);
     }
-    const row = document.createElement("div");
-    row.className = "list-row";
-    const g = w.g ? `<span class="list-g">${w.g}</span>` : "";
-    row.innerHTML =
-      `<div class="list-he" dir="rtl">${w.he}</div>`+
+    const row=document.createElement("div"); row.className="list-row";
+    const g=w.g?`<span class="list-g">${w.g}</span>`:"";
+    row.innerHTML=`<div class="list-he" dir="rtl">${w.he}</div><div class="list-tr">${w.tr}</div><div class="list-ru">${w.ru}${g}</div>`;
+    box.appendChild(row);
+  });
+  if(!p.length) box.innerHTML='<div class="empty">Нет слов по этому фильтру.</div>';
+}
+
+/* ===== поиск ===== */
+function norm(s){return s.toLowerCase().replace(/[׳״'"]/g,"").trim();}
+function renderSearch(){
+  const box=$("searchBox"); const q=norm(query);
+  if(!q){box.innerHTML='<div class="empty">Начни вводить слово на иврите, в транскрипции или по-русски.</div>';$("searchCount").textContent="";return;}
+  const res=ALL.filter(w=>norm(w.he).includes(q)||norm(w.tr).includes(q)||norm(w.ru).includes(q));
+  $("searchCount").textContent=res.length+" найдено";
+  box.innerHTML="";
+  if(!res.length){box.innerHTML='<div class="empty">Ничего не найдено.</div>';return;}
+  res.slice(0,200).forEach(w=>{
+    const row=document.createElement("div"); row.className="list-row";
+    row.innerHTML=`<div class="list-he" dir="rtl">${w.he}</div>`+
       `<div class="list-tr">${w.tr}</div>`+
-      `<div class="list-ru">${w.ru}${g}</div>`;
+      `<div class="list-ru">${w.ru}</div>`+
+      `<div class="src-tag">${w.src}</div>`;
     box.appendChild(row);
   });
 }
+
+/* ===== общее ===== */
+function updateStats(){$("stViewed").textContent=viewed.size;$("stScore").textContent=`${score.right}/${score.total}`;}
+function refresh(){ if(mode==="flash")render(); else if(mode==="quiz")newQuestion(); else renderList(); }
+
+function showView(){
+  const study = section!=="search";
+  $("studyBar").style.display = study?"":"none";
+  $("flashView").style.display = (study&&mode==="flash")?"":"none";
+  $("quizView").style.display  = (study&&mode==="quiz")?"block":"none";
+  $("listView").style.display  = (study&&mode==="list")?"block":"none";
+  $("searchView").style.display= (section==="search")?"block":"none";
+  $("themeCtrl").style.display = section==="theme"?"":"none";
+  $("lessonCtrl").style.display= section==="lessons"?"":"none";
+  $("searchCtrl").style.display= section==="search"?"":"none";
+}
+function setSection(s){
+  section=s;
+  $("secTheme").setAttribute("aria-pressed",s==="theme");
+  $("secLessons").setAttribute("aria-pressed",s==="lessons");
+  $("secSearch").setAttribute("aria-pressed",s==="search");
+  showView();
+  if(s==="search"){ $("searchCount").textContent=""; renderSearch(); setTimeout(()=>$("searchInput").focus(),0); }
+  else { buildDeck(); refresh(); }
+}
+function setMode(m){
+  mode=m;
+  $("mFlash").setAttribute("aria-pressed",m==="flash");
+  $("mQuiz").setAttribute("aria-pressed",m==="quiz");
+  $("mList").setAttribute("aria-pressed",m==="list");
+  showView(); refresh();
+}
 function toggleDir(){
-  heToRu = !heToRu;
-  $("dirBtn").textContent = heToRu ? "עברית → рус." : "рус. → עברית";
-  if(mode==="flash") render(); else if(mode==="quiz") newQuestion();
+  heToRu=!heToRu;
+  $("dirBtn").textContent=heToRu?"עברית → рус.":"рус. → עברית";
+  if(mode!=="list")refresh();
 }
 
-/* ---------- события ---------- */
-$("card").onclick = flip;
-$("card").onkeydown = e=>{ if(e.key===" "||e.key==="Enter"){e.preventDefault();flip();} };
-$("nextBtn").onclick = next;
-$("prevBtn").onclick = prev;
-$("shuffleBtn").onclick = ()=>{ buildDeck(); render(); };
-$("mFlash").onclick = ()=>setMode("flash");
-$("mQuiz").onclick = ()=>setMode("quiz");
-$("mList").onclick = ()=>setMode("list");
-$("dirBtn").onclick = toggleDir;
-$("qNext").onclick = newQuestion;
-document.addEventListener("keydown", e=>{
-  if(mode!=="flash") return;
-  if(e.key==="ArrowRight") next();
-  if(e.key==="ArrowLeft") prev();
+/* ===== события ===== */
+$("secTheme").onclick=()=>setSection("theme");
+$("secLessons").onclick=()=>setSection("lessons");
+$("secSearch").onclick=()=>setSection("search");
+$("lessonSel").onchange=e=>{lessonSel=e.target.value;buildDeck();refresh();};
+$("lessonCat").onchange=e=>{lessonCat=e.target.value;buildDeck();refresh();};
+$("searchInput").oninput=e=>{query=e.target.value;renderSearch();};
+$("card").onclick=flip;
+$("card").onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();flip();}};
+$("nextBtn").onclick=next; $("prevBtn").onclick=prev;
+$("shuffleBtn").onclick=()=>{buildDeck();render();};
+$("mFlash").onclick=()=>setMode("flash");
+$("mQuiz").onclick=()=>setMode("quiz");
+$("mList").onclick=()=>setMode("list");
+$("dirBtn").onclick=toggleDir;
+$("qNext").onclick=newQuestion;
+document.addEventListener("keydown",e=>{
+  if(section==="search"||mode!=="flash")return;
+  if(e.key==="ArrowRight")next();
+  if(e.key==="ArrowLeft")prev();
 });
 
-/* ---------- старт ---------- */
+/* ===== старт ===== */
 renderCats();
 buildDeck();
-setMode("flash");
-
-/* трейнер запустился — статический список больше не нужен */
-var _fb=document.getElementById("fallback"); if(_fb) _fb.style.display="none";
-
+setSection("theme");
+var _fb=document.getElementById("fallback"); if(_fb)_fb.style.display="none";
 </script>
 </body>
 </html>
