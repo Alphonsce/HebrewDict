@@ -203,6 +203,45 @@
     #searchView .list-row{grid-template-columns:42% 1fr}
     #searchView .src-tag{grid-column:1 / -1;justify-self:start;color:var(--muted)}
   }
+
+  /* ---- числа ---- */
+  .num-legend{display:grid;grid-template-columns:56px 1fr 1fr;gap:8px;padding:6px;font-size:11px;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .num-legend span:nth-child(2){color:var(--cyan)} .num-legend span:nth-child(3){color:var(--amber-dim)}
+  .num-row{display:grid;grid-template-columns:56px 1fr 1fr;gap:8px;align-items:center;
+    padding:11px 6px;border-bottom:1px solid var(--line)}
+  .num-row:hover{background:var(--ink-2)}
+  .num-n{font-size:17px;font-weight:700;color:var(--muted);text-align:center}
+  .num-cell .h{font-family:"Frank Ruhl Libre","David Libre","Times New Roman",serif;font-size:23px;
+    font-weight:700;color:var(--paper);direction:rtl;display:block;text-align:right}
+  .num-cell .t{font-size:12.5px;color:var(--muted);display:block;text-align:right;margin-top:1px}
+  .num-round{background:rgba(70,200,190,.06)}
+  @media(max-width:480px){
+    .num-legend,.num-row{grid-template-columns:40px 1fr 1fr}
+    .num-cell .h{font-size:20px}
+  }
+
+  /* ---- вкладка «Исключения» ---- */
+  .exc-intro{font-size:13.5px;color:var(--muted);line-height:1.5;margin:2px 2px 16px}
+  .exc-card{background:linear-gradient(180deg,var(--panel),var(--ink-2));border:1px solid var(--line);
+    border-radius:16px;padding:16px 16px 14px;margin-bottom:12px}
+  .exc-ru{font-size:13px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px}
+  .exc-line{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
+  .exc-form{display:flex;flex-direction:column;gap:2px}
+  .exc-form.pl{text-align:left}
+  .exc-form .he{font-family:"Frank Ruhl Libre","David Libre","Times New Roman",serif;font-size:26px;
+    font-weight:700;color:var(--paper);direction:rtl}
+  .exc-form .t{font-size:12.5px;color:var(--cyan)}
+  .exc-form .lbl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .exc-arrow{font-size:20px;color:var(--amber);font-weight:700}
+  .exc-note{font-size:12.5px;color:var(--muted);margin-top:12px;padding-top:11px;border-top:1px solid var(--line);line-height:1.5}
+  .sections{flex-wrap:wrap}
+  .sections button{flex:1 1 auto;min-width:74px}
+  @media(max-width:480px){
+    .exc-line{grid-template-columns:1fr;gap:8px}
+    .exc-arrow{transform:rotate(90deg);justify-self:start}
+    .exc-form .he{font-size:23px}
+  }
 </style>
 
 <body>
@@ -227,6 +266,8 @@
     <button id="secTheme" role="tab" aria-pressed="true">Тема</button>
     <button id="secLessons" role="tab" aria-pressed="false">Уроки</button>
     <button id="secSearch" role="tab" aria-pressed="false">Поиск</button>
+    <button id="secNumbers" role="tab" aria-pressed="false">Числа</button>
+    <button id="secExc" role="tab" aria-pressed="false">Исключения</button>
   </div>
 
   <!-- THEME controls -->
@@ -349,6 +390,26 @@
       <span id="searchCount" class="list-count"></span>
     </div>
     <div id="searchBox"></div>
+  </section>
+
+  <!-- NUMBERS 1..100 -->
+  <section id="numbersView" style="display:none">
+    <div class="list-head">
+      <span>Числа 1–100</span>
+      <span class="list-count">мужской и женский род</span>
+    </div>
+    <div class="num-legend"><span></span><span>женский род</span><span>мужской род</span></div>
+    <div id="numbersBox"></div>
+  </section>
+
+  <!-- EXCEPTIONS -->
+  <section id="excView" style="display:none">
+    <div class="list-head">
+      <span>Исключения по роду</span>
+      <span class="list-count">мн.ч. как «другой» род</span>
+    </div>
+    <div class="exc-intro">Существительные, у которых форма мн.ч. выглядит как окончание другого рода, но прилагательное сохраняет исходный род:</div>
+    <div id="excBox"></div>
   </section>
 
   <!-- static fallback (no-JS) -->
@@ -796,6 +857,117 @@
 <tr><td class="fb-he" dir="rtl">מה שמך</td><td class="fb-tr">ма шимха</td><td class="fb-ru">как тебя зовут? (м.р.) <span class="fb-g">Разное</span></td></tr>
 <tr><td class="fb-he" dir="rtl">שמי</td><td class="fb-tr">шми</td><td class="fb-ru">моё имя <span class="fb-g">Разное</span></td></tr>
 </table>
+<h3 class="fb-cat">Числа 1–100 · ж.р. / м.р.</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">אחת / אחד</td><td class="fb-tr">ахат / эхад</td><td class="fb-ru">1</td></tr>
+<tr><td class="fb-he" dir="rtl">שתיים / שניים</td><td class="fb-tr">штаим / шнаим</td><td class="fb-ru">2</td></tr>
+<tr><td class="fb-he" dir="rtl">שלוש / שלושה</td><td class="fb-tr">шалош / шлоша</td><td class="fb-ru">3</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבע / ארבעה</td><td class="fb-tr">арба / арбаа</td><td class="fb-ru">4</td></tr>
+<tr><td class="fb-he" dir="rtl">חמש / חמישה</td><td class="fb-tr">хамеш / хамиша</td><td class="fb-ru">5</td></tr>
+<tr><td class="fb-he" dir="rtl">שש / שישה</td><td class="fb-tr">шеш / шиша</td><td class="fb-ru">6</td></tr>
+<tr><td class="fb-he" dir="rtl">שבע / שבעה</td><td class="fb-tr">шева / шива</td><td class="fb-ru">7</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונה / שמונה</td><td class="fb-tr">шмонэ / шмона</td><td class="fb-ru">8</td></tr>
+<tr><td class="fb-he" dir="rtl">תשע / תשעה</td><td class="fb-tr">тэша / тиша</td><td class="fb-ru">9</td></tr>
+<tr><td class="fb-he" dir="rtl">עשר / עשרה</td><td class="fb-tr">эсэр / асара</td><td class="fb-ru">10</td></tr>
+<tr><td class="fb-he" dir="rtl">אחת עשרה / אחד עשר</td><td class="fb-tr">ахат-эсрэ / ахад-асар</td><td class="fb-ru">11</td></tr>
+<tr><td class="fb-he" dir="rtl">שתים עשרה / שנים עשר</td><td class="fb-tr">штэйм-эсрэ / шнэйм-асар</td><td class="fb-ru">12</td></tr>
+<tr><td class="fb-he" dir="rtl">שלוש עשרה / שלושה עשר</td><td class="fb-tr">шлош-эсрэ / шлоша-асар</td><td class="fb-ru">13</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבע עשרה / ארבעה עשר</td><td class="fb-tr">арба-эсрэ / арбаа-асар</td><td class="fb-ru">14</td></tr>
+<tr><td class="fb-he" dir="rtl">חמש עשרה / חמישה עשר</td><td class="fb-tr">хамеш-эсрэ / хамиша-асар</td><td class="fb-ru">15</td></tr>
+<tr><td class="fb-he" dir="rtl">שש עשרה / שישה עשר</td><td class="fb-tr">шеш-эсрэ / шиша-асар</td><td class="fb-ru">16</td></tr>
+<tr><td class="fb-he" dir="rtl">שבע עשרה / שבעה עשר</td><td class="fb-tr">шва-эсрэ / шива-асар</td><td class="fb-ru">17</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונה עשרה / שמונה עשר</td><td class="fb-tr">шмонэ-эсрэ / шмона-асар</td><td class="fb-ru">18</td></tr>
+<tr><td class="fb-he" dir="rtl">תשע עשרה / תשעה עשר</td><td class="fb-tr">тша-эсрэ / тиша-асар</td><td class="fb-ru">19</td></tr>
+<tr><td class="fb-he" dir="rtl">עשרים / עשרים</td><td class="fb-tr">эсрим / эсрим</td><td class="fb-ru">20</td></tr>
+<tr><td class="fb-he" dir="rtl">עשרים ואחת / עשרים ואחד</td><td class="fb-tr">эсрим вэ-ахат / эсрим вэ-эхад</td><td class="fb-ru">21</td></tr>
+<tr><td class="fb-he" dir="rtl">עשרים ושתיים / עשרים ושניים</td><td class="fb-tr">эсрим вэ-штаим / эсрим вэ-шнаим</td><td class="fb-ru">22</td></tr>
+<tr><td class="fb-he" dir="rtl">עשרים ושלוש / עשרים ושלושה</td><td class="fb-tr">эсрим вэ-шалош / эсрим вэ-шлоша</td><td class="fb-ru">23</td></tr>
+<tr><td class="fb-he" dir="rtl">עשרים וארבע / עשרים וארבעה</td><td class="fb-tr">эсрим вэ-арба / эсрим вэ-арбаа</td><td class="fb-ru">24</td></tr>
+<tr><td class="fb-he" dir="rtl">עשרים וחמש / עשרים וחמישה</td><td class="fb-tr">эсрим вэ-хамеш / эсрим вэ-хамиша</td><td class="fb-ru">25</td></tr>
+<tr><td class="fb-he" dir="rtl">עשרים ושש / עשרים ושישה</td><td class="fb-tr">эсрим вэ-шеш / эсрим вэ-шиша</td><td class="fb-ru">26</td></tr>
+<tr><td class="fb-he" dir="rtl">עשרים ושבע / עשרים ושבעה</td><td class="fb-tr">эсрим вэ-шева / эсрим вэ-шива</td><td class="fb-ru">27</td></tr>
+<tr><td class="fb-he" dir="rtl">עשרים ושמונה / עשרים ושמונה</td><td class="fb-tr">эсрим вэ-шмонэ / эсрим вэ-шмона</td><td class="fb-ru">28</td></tr>
+<tr><td class="fb-he" dir="rtl">עשרים ותשע / עשרים ותשעה</td><td class="fb-tr">эсрим вэ-тэша / эсрим вэ-тиша</td><td class="fb-ru">29</td></tr>
+<tr><td class="fb-he" dir="rtl">שלושים / שלושים</td><td class="fb-tr">шлошим / шлошим</td><td class="fb-ru">30</td></tr>
+<tr><td class="fb-he" dir="rtl">שלושים ואחת / שלושים ואחד</td><td class="fb-tr">шлошим вэ-ахат / шлошим вэ-эхад</td><td class="fb-ru">31</td></tr>
+<tr><td class="fb-he" dir="rtl">שלושים ושתיים / שלושים ושניים</td><td class="fb-tr">шлошим вэ-штаим / шлошим вэ-шнаим</td><td class="fb-ru">32</td></tr>
+<tr><td class="fb-he" dir="rtl">שלושים ושלוש / שלושים ושלושה</td><td class="fb-tr">шлошим вэ-шалош / шлошим вэ-шлоша</td><td class="fb-ru">33</td></tr>
+<tr><td class="fb-he" dir="rtl">שלושים וארבע / שלושים וארבעה</td><td class="fb-tr">шлошим вэ-арба / шлошим вэ-арбаа</td><td class="fb-ru">34</td></tr>
+<tr><td class="fb-he" dir="rtl">שלושים וחמש / שלושים וחמישה</td><td class="fb-tr">шлошим вэ-хамеш / шлошим вэ-хамиша</td><td class="fb-ru">35</td></tr>
+<tr><td class="fb-he" dir="rtl">שלושים ושש / שלושים ושישה</td><td class="fb-tr">шлошим вэ-шеш / шлошим вэ-шиша</td><td class="fb-ru">36</td></tr>
+<tr><td class="fb-he" dir="rtl">שלושים ושבע / שלושים ושבעה</td><td class="fb-tr">шлошим вэ-шева / шлошим вэ-шива</td><td class="fb-ru">37</td></tr>
+<tr><td class="fb-he" dir="rtl">שלושים ושמונה / שלושים ושמונה</td><td class="fb-tr">шлошим вэ-шмонэ / шлошим вэ-шмона</td><td class="fb-ru">38</td></tr>
+<tr><td class="fb-he" dir="rtl">שלושים ותשע / שלושים ותשעה</td><td class="fb-tr">шлошим вэ-тэша / шлошим вэ-тиша</td><td class="fb-ru">39</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעים / ארבעים</td><td class="fb-tr">арбаим / арбаим</td><td class="fb-ru">40</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעים ואחת / ארבעים ואחד</td><td class="fb-tr">арбаим вэ-ахат / арбаим вэ-эхад</td><td class="fb-ru">41</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעים ושתיים / ארבעים ושניים</td><td class="fb-tr">арбаим вэ-штаим / арбаим вэ-шнаим</td><td class="fb-ru">42</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעים ושלוש / ארבעים ושלושה</td><td class="fb-tr">арбаим вэ-шалош / арбаим вэ-шлоша</td><td class="fb-ru">43</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעים וארבע / ארבעים וארבעה</td><td class="fb-tr">арбаим вэ-арба / арбаим вэ-арбаа</td><td class="fb-ru">44</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעים וחמש / ארבעים וחמישה</td><td class="fb-tr">арбаим вэ-хамеш / арбаим вэ-хамиша</td><td class="fb-ru">45</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעים ושש / ארבעים ושישה</td><td class="fb-tr">арбаим вэ-шеш / арбаим вэ-шиша</td><td class="fb-ru">46</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעים ושבע / ארבעים ושבעה</td><td class="fb-tr">арбаим вэ-шева / арбаим вэ-шива</td><td class="fb-ru">47</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעים ושמונה / ארבעים ושמונה</td><td class="fb-tr">арбаим вэ-шмонэ / арбаим вэ-шмона</td><td class="fb-ru">48</td></tr>
+<tr><td class="fb-he" dir="rtl">ארבעים ותשע / ארבעים ותשעה</td><td class="fb-tr">арбаим вэ-тэша / арбаим вэ-тиша</td><td class="fb-ru">49</td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים / חמישים</td><td class="fb-tr">хамишим / хамишим</td><td class="fb-ru">50</td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים ואחת / חמישים ואחד</td><td class="fb-tr">хамишим вэ-ахат / хамишим вэ-эхад</td><td class="fb-ru">51</td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים ושתיים / חמישים ושניים</td><td class="fb-tr">хамишим вэ-штаим / хамишим вэ-шнаим</td><td class="fb-ru">52</td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים ושלוש / חמישים ושלושה</td><td class="fb-tr">хамишим вэ-шалош / хамишим вэ-шлоша</td><td class="fb-ru">53</td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים וארבע / חמישים וארבעה</td><td class="fb-tr">хамишим вэ-арба / хамишим вэ-арбаа</td><td class="fb-ru">54</td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים וחמש / חמישים וחמישה</td><td class="fb-tr">хамишим вэ-хамеш / хамишим вэ-хамиша</td><td class="fb-ru">55</td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים ושש / חמישים ושישה</td><td class="fb-tr">хамишим вэ-шеш / хамишим вэ-шиша</td><td class="fb-ru">56</td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים ושבע / חמישים ושבעה</td><td class="fb-tr">хамишим вэ-шева / хамишим вэ-шива</td><td class="fb-ru">57</td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים ושמונה / חמישים ושמונה</td><td class="fb-tr">хамишим вэ-шмонэ / хамишим вэ-шмона</td><td class="fb-ru">58</td></tr>
+<tr><td class="fb-he" dir="rtl">חמישים ותשע / חמישים ותשעה</td><td class="fb-tr">хамишим вэ-тэша / хамишим вэ-тиша</td><td class="fb-ru">59</td></tr>
+<tr><td class="fb-he" dir="rtl">שישים / שישים</td><td class="fb-tr">шишим / шишим</td><td class="fb-ru">60</td></tr>
+<tr><td class="fb-he" dir="rtl">שישים ואחת / שישים ואחד</td><td class="fb-tr">шишим вэ-ахат / шишим вэ-эхад</td><td class="fb-ru">61</td></tr>
+<tr><td class="fb-he" dir="rtl">שישים ושתיים / שישים ושניים</td><td class="fb-tr">шишим вэ-штаим / шишим вэ-шнаим</td><td class="fb-ru">62</td></tr>
+<tr><td class="fb-he" dir="rtl">שישים ושלוש / שישים ושלושה</td><td class="fb-tr">шишим вэ-шалош / шишим вэ-шлоша</td><td class="fb-ru">63</td></tr>
+<tr><td class="fb-he" dir="rtl">שישים וארבע / שישים וארבעה</td><td class="fb-tr">шишим вэ-арба / шишим вэ-арбаа</td><td class="fb-ru">64</td></tr>
+<tr><td class="fb-he" dir="rtl">שישים וחמש / שישים וחמישה</td><td class="fb-tr">шишим вэ-хамеш / шишим вэ-хамиша</td><td class="fb-ru">65</td></tr>
+<tr><td class="fb-he" dir="rtl">שישים ושש / שישים ושישה</td><td class="fb-tr">шишим вэ-шеш / шишим вэ-шиша</td><td class="fb-ru">66</td></tr>
+<tr><td class="fb-he" dir="rtl">שישים ושבע / שישים ושבעה</td><td class="fb-tr">шишим вэ-шева / шишим вэ-шива</td><td class="fb-ru">67</td></tr>
+<tr><td class="fb-he" dir="rtl">שישים ושמונה / שישים ושמונה</td><td class="fb-tr">шишим вэ-шмонэ / шишим вэ-шмона</td><td class="fb-ru">68</td></tr>
+<tr><td class="fb-he" dir="rtl">שישים ותשע / שישים ותשעה</td><td class="fb-tr">шишим вэ-тэша / шишим вэ-тиша</td><td class="fb-ru">69</td></tr>
+<tr><td class="fb-he" dir="rtl">שבעים / שבעים</td><td class="fb-tr">шивим / шивим</td><td class="fb-ru">70</td></tr>
+<tr><td class="fb-he" dir="rtl">שבעים ואחת / שבעים ואחד</td><td class="fb-tr">шивим вэ-ахат / шивим вэ-эхад</td><td class="fb-ru">71</td></tr>
+<tr><td class="fb-he" dir="rtl">שבעים ושתיים / שבעים ושניים</td><td class="fb-tr">шивим вэ-штаим / шивим вэ-шнаим</td><td class="fb-ru">72</td></tr>
+<tr><td class="fb-he" dir="rtl">שבעים ושלוש / שבעים ושלושה</td><td class="fb-tr">шивим вэ-шалош / шивим вэ-шлоша</td><td class="fb-ru">73</td></tr>
+<tr><td class="fb-he" dir="rtl">שבעים וארבע / שבעים וארבעה</td><td class="fb-tr">шивим вэ-арба / шивим вэ-арбаа</td><td class="fb-ru">74</td></tr>
+<tr><td class="fb-he" dir="rtl">שבעים וחמש / שבעים וחמישה</td><td class="fb-tr">шивим вэ-хамеш / шивим вэ-хамиша</td><td class="fb-ru">75</td></tr>
+<tr><td class="fb-he" dir="rtl">שבעים ושש / שבעים ושישה</td><td class="fb-tr">шивим вэ-шеш / шивим вэ-шиша</td><td class="fb-ru">76</td></tr>
+<tr><td class="fb-he" dir="rtl">שבעים ושבע / שבעים ושבעה</td><td class="fb-tr">шивим вэ-шева / шивим вэ-шива</td><td class="fb-ru">77</td></tr>
+<tr><td class="fb-he" dir="rtl">שבעים ושמונה / שבעים ושמונה</td><td class="fb-tr">шивим вэ-шмонэ / шивим вэ-шмона</td><td class="fb-ru">78</td></tr>
+<tr><td class="fb-he" dir="rtl">שבעים ותשע / שבעים ותשעה</td><td class="fb-tr">шивим вэ-тэша / шивим вэ-тиша</td><td class="fb-ru">79</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונים / שמונים</td><td class="fb-tr">шмоним / шмоним</td><td class="fb-ru">80</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונים ואחת / שמונים ואחד</td><td class="fb-tr">шмоним вэ-ахат / шмоним вэ-эхад</td><td class="fb-ru">81</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונים ושתיים / שמונים ושניים</td><td class="fb-tr">шмоним вэ-штаим / шмоним вэ-шнаим</td><td class="fb-ru">82</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונים ושלוש / שמונים ושלושה</td><td class="fb-tr">шмоним вэ-шалош / шмоним вэ-шлоша</td><td class="fb-ru">83</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונים וארבע / שמונים וארבעה</td><td class="fb-tr">шмоним вэ-арба / шмоним вэ-арбаа</td><td class="fb-ru">84</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונים וחמש / שמונים וחמישה</td><td class="fb-tr">шмоним вэ-хамеш / шмоним вэ-хамиша</td><td class="fb-ru">85</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונים ושש / שמונים ושישה</td><td class="fb-tr">шмоним вэ-шеш / шмоним вэ-шиша</td><td class="fb-ru">86</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונים ושבע / שמונים ושבעה</td><td class="fb-tr">шмоним вэ-шева / шмоним вэ-шива</td><td class="fb-ru">87</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונים ושמונה / שמונים ושמונה</td><td class="fb-tr">шмоним вэ-шмонэ / шмоним вэ-шмона</td><td class="fb-ru">88</td></tr>
+<tr><td class="fb-he" dir="rtl">שמונים ותשע / שמונים ותשעה</td><td class="fb-tr">шмоним вэ-тэша / шмоним вэ-тиша</td><td class="fb-ru">89</td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים / תשעים</td><td class="fb-tr">тишим / тишим</td><td class="fb-ru">90</td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים ואחת / תשעים ואחד</td><td class="fb-tr">тишим вэ-ахат / тишим вэ-эхад</td><td class="fb-ru">91</td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים ושתיים / תשעים ושניים</td><td class="fb-tr">тишим вэ-штаим / тишим вэ-шнаим</td><td class="fb-ru">92</td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים ושלוש / תשעים ושלושה</td><td class="fb-tr">тишим вэ-шалош / тишим вэ-шлоша</td><td class="fb-ru">93</td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים וארבע / תשעים וארבעה</td><td class="fb-tr">тишим вэ-арба / тишим вэ-арбаа</td><td class="fb-ru">94</td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים וחמש / תשעים וחמישה</td><td class="fb-tr">тишим вэ-хамеш / тишим вэ-хамиша</td><td class="fb-ru">95</td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים ושש / תשעים ושישה</td><td class="fb-tr">тишим вэ-шеш / тишим вэ-шиша</td><td class="fb-ru">96</td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים ושבע / תשעים ושבעה</td><td class="fb-tr">тишим вэ-шева / тишим вэ-шива</td><td class="fb-ru">97</td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים ושמונה / תשעים ושמונה</td><td class="fb-tr">тишим вэ-шмонэ / тишим вэ-шмона</td><td class="fb-ru">98</td></tr>
+<tr><td class="fb-he" dir="rtl">תשעים ותשע / תשעים ותשעה</td><td class="fb-tr">тишим вэ-тэша / тишим вэ-тиша</td><td class="fb-ru">99</td></tr>
+<tr><td class="fb-he" dir="rtl">מאה / מאה</td><td class="fb-tr">меа / меа</td><td class="fb-ru">100</td></tr>
+</table>
+<h3 class="fb-cat">Исключения по роду · ед. → мн.</h3><table class="fb-tbl">
+<tr><td class="fb-he" dir="rtl">איש טוב → אנשים טובים</td><td class="fb-tr">иш тов → анашим товим</td><td class="fb-ru">человек, мужчина → люди</td></tr>
+<tr><td class="fb-he" dir="rtl">אישה יפה → נשים יפות</td><td class="fb-tr">иша яфа → нашим яфот</td><td class="fb-ru">женщина → женщины</td></tr>
+<tr><td class="fb-he" dir="rtl">עיר עתיקה → ערים עתיקות</td><td class="fb-tr">ир атика → арим атикот</td><td class="fb-ru">город → города</td></tr>
+<tr><td class="fb-he" dir="rtl">שולחן קטן → שולחנות קטנים</td><td class="fb-tr">шульхан катан → шульханот ктаним</td><td class="fb-ru">стол → столы</td></tr>
+<tr><td class="fb-he" dir="rtl">כיסא חדש → כיסאות חדשים</td><td class="fb-tr">кисэ хадаш → кисаот хадашим</td><td class="fb-ru">стул → стулья</td></tr>
+<tr><td class="fb-he" dir="rtl">מלון חדש → מלונות חדשים</td><td class="fb-tr">малон хадаш → малонот хадашим</td><td class="fb-ru">отель, гостиница → отели</td></tr>
+<tr><td class="fb-he" dir="rtl">רחוב גדול → רחובות גדולים</td><td class="fb-tr">рехов гадоль → реховот гдолим</td><td class="fb-ru">улица → улицы</td></tr>
+</table>
   </section>
 
 </div>
@@ -1234,8 +1406,123 @@ const LESSONS = [
   {he:"מה שמך",tr:"ма шимха",ru:"как тебя зовут? (м.р.)",cat:"Разное",les:13},
   {he:"שמי",tr:"шми",ru:"моё имя",cat:"Разное",les:13},
 ];
+const EXC = [
+  {ru:"человек, мужчина → люди",hs:"איש טוב",ts:"иш тов",hp:"אנשים טובים",tp:"анашим товим",note:"м.р.; мн. אנשים — нерегулярная форма от איש; прил. в м.р."},
+  {ru:"женщина → женщины",hs:"אישה יפה",ts:"иша яфа",hp:"נשים יפות",tp:"нашим яфот",note:"ж.р.; мн. נשים оканчивается на ־ים (как м.р.), но прил. в ж.р."},
+  {ru:"город → города",hs:"עיר עתיקה",ts:"ир атика",hp:"ערים עתיקות",tp:"арим атикот",note:"ж.р.; мн. ערים на ־ים (как м.р.), но прил. в ж.р."},
+  {ru:"стол → столы",hs:"שולחן קטן",ts:"шульхан катан",hp:"שולחנות קטנים",tp:"шульханот ктаним",note:"м.р.; мн. на ־ות (как ж.р.), но прил. в м.р."},
+  {ru:"стул → стулья",hs:"כיסא חדש",ts:"кисэ хадаш",hp:"כיסאות חדשים",tp:"кисаот хадашим",note:"м.р.; мн. на ־ות (как ж.р.), но прил. в м.р."},
+  {ru:"отель, гостиница → отели",hs:"מלון חדש",ts:"малон хадаш",hp:"מלונות חדשים",tp:"малонот хадашим",note:"м.р.; мн. на ־ות (как ж.р.), но прил. в м.р."},
+  {ru:"улица → улицы",hs:"רחוב גדול",ts:"рехов гадоль",hp:"רחובות גדולים",tp:"реховот гдолим",note:"м.р.; мн. на ־ות (как ж.р.), но прил. в м.р."},
+];
+
 const ALL = THEME.map(w=>Object.assign({},w,{src:"Тема"}))
-  .concat(LESSONS.map(w=>Object.assign({},w,{src:"Урок "+w.les})));
+  .concat(LESSONS.map(w=>Object.assign({},w,{src:"Урок "+w.les})))
+  .concat(EXC.map(w=>({he:w.hs,tr:w.ts,ru:w.ru,src:"Исключение"})))
+  .concat(EXC.map(w=>({he:w.hp,tr:w.tp,ru:w.ru,src:"Исключение (мн.)"})));
+const NUMBERS = [
+  {n:1,hf:"אחת",tf:"ахат",hm:"אחד",tm:"эхад"},
+  {n:2,hf:"שתיים",tf:"штаим",hm:"שניים",tm:"шнаим"},
+  {n:3,hf:"שלוש",tf:"шалош",hm:"שלושה",tm:"шлоша"},
+  {n:4,hf:"ארבע",tf:"арба",hm:"ארבעה",tm:"арбаа"},
+  {n:5,hf:"חמש",tf:"хамеш",hm:"חמישה",tm:"хамиша"},
+  {n:6,hf:"שש",tf:"шеш",hm:"שישה",tm:"шиша"},
+  {n:7,hf:"שבע",tf:"шева",hm:"שבעה",tm:"шива"},
+  {n:8,hf:"שמונה",tf:"шмонэ",hm:"שמונה",tm:"шмона"},
+  {n:9,hf:"תשע",tf:"тэша",hm:"תשעה",tm:"тиша"},
+  {n:10,hf:"עשר",tf:"эсэр",hm:"עשרה",tm:"асара"},
+  {n:11,hf:"אחת עשרה",tf:"ахат-эсрэ",hm:"אחד עשר",tm:"ахад-асар"},
+  {n:12,hf:"שתים עשרה",tf:"штэйм-эсрэ",hm:"שנים עשר",tm:"шнэйм-асар"},
+  {n:13,hf:"שלוש עשרה",tf:"шлош-эсрэ",hm:"שלושה עשר",tm:"шлоша-асар"},
+  {n:14,hf:"ארבע עשרה",tf:"арба-эсрэ",hm:"ארבעה עשר",tm:"арбаа-асар"},
+  {n:15,hf:"חמש עשרה",tf:"хамеш-эсрэ",hm:"חמישה עשר",tm:"хамиша-асар"},
+  {n:16,hf:"שש עשרה",tf:"шеш-эсрэ",hm:"שישה עשר",tm:"шиша-асар"},
+  {n:17,hf:"שבע עשרה",tf:"шва-эсрэ",hm:"שבעה עשר",tm:"шива-асар"},
+  {n:18,hf:"שמונה עשרה",tf:"шмонэ-эсрэ",hm:"שמונה עשר",tm:"шмона-асар"},
+  {n:19,hf:"תשע עשרה",tf:"тша-эсрэ",hm:"תשעה עשר",tm:"тиша-асар"},
+  {n:20,hf:"עשרים",tf:"эсрим",hm:"עשרים",tm:"эсрим"},
+  {n:21,hf:"עשרים ואחת",tf:"эсрим вэ-ахат",hm:"עשרים ואחד",tm:"эсрим вэ-эхад"},
+  {n:22,hf:"עשרים ושתיים",tf:"эсрим вэ-штаим",hm:"עשרים ושניים",tm:"эсрим вэ-шнаим"},
+  {n:23,hf:"עשרים ושלוש",tf:"эсрим вэ-шалош",hm:"עשרים ושלושה",tm:"эсрим вэ-шлоша"},
+  {n:24,hf:"עשרים וארבע",tf:"эсрим вэ-арба",hm:"עשרים וארבעה",tm:"эсрим вэ-арбаа"},
+  {n:25,hf:"עשרים וחמש",tf:"эсрим вэ-хамеш",hm:"עשרים וחמישה",tm:"эсрим вэ-хамиша"},
+  {n:26,hf:"עשרים ושש",tf:"эсрим вэ-шеш",hm:"עשרים ושישה",tm:"эсрим вэ-шиша"},
+  {n:27,hf:"עשרים ושבע",tf:"эсрим вэ-шева",hm:"עשרים ושבעה",tm:"эсрим вэ-шива"},
+  {n:28,hf:"עשרים ושמונה",tf:"эсрим вэ-шмонэ",hm:"עשרים ושמונה",tm:"эсрим вэ-шмона"},
+  {n:29,hf:"עשרים ותשע",tf:"эсрим вэ-тэша",hm:"עשרים ותשעה",tm:"эсрим вэ-тиша"},
+  {n:30,hf:"שלושים",tf:"шлошим",hm:"שלושים",tm:"шлошим"},
+  {n:31,hf:"שלושים ואחת",tf:"шлошим вэ-ахат",hm:"שלושים ואחד",tm:"шлошим вэ-эхад"},
+  {n:32,hf:"שלושים ושתיים",tf:"шлошим вэ-штаим",hm:"שלושים ושניים",tm:"шлошим вэ-шнаим"},
+  {n:33,hf:"שלושים ושלוש",tf:"шлошим вэ-шалош",hm:"שלושים ושלושה",tm:"шлошим вэ-шлоша"},
+  {n:34,hf:"שלושים וארבע",tf:"шлошим вэ-арба",hm:"שלושים וארבעה",tm:"шлошим вэ-арбаа"},
+  {n:35,hf:"שלושים וחמש",tf:"шлошим вэ-хамеш",hm:"שלושים וחמישה",tm:"шлошим вэ-хамиша"},
+  {n:36,hf:"שלושים ושש",tf:"шлошим вэ-шеш",hm:"שלושים ושישה",tm:"шлошим вэ-шиша"},
+  {n:37,hf:"שלושים ושבע",tf:"шлошим вэ-шева",hm:"שלושים ושבעה",tm:"шлошим вэ-шива"},
+  {n:38,hf:"שלושים ושמונה",tf:"шлошим вэ-шмонэ",hm:"שלושים ושמונה",tm:"шлошим вэ-шмона"},
+  {n:39,hf:"שלושים ותשע",tf:"шлошим вэ-тэша",hm:"שלושים ותשעה",tm:"шлошим вэ-тиша"},
+  {n:40,hf:"ארבעים",tf:"арбаим",hm:"ארבעים",tm:"арбаим"},
+  {n:41,hf:"ארבעים ואחת",tf:"арбаим вэ-ахат",hm:"ארבעים ואחד",tm:"арбаим вэ-эхад"},
+  {n:42,hf:"ארבעים ושתיים",tf:"арбаим вэ-штаим",hm:"ארבעים ושניים",tm:"арбаим вэ-шнаим"},
+  {n:43,hf:"ארבעים ושלוש",tf:"арбаим вэ-шалош",hm:"ארבעים ושלושה",tm:"арбаим вэ-шлоша"},
+  {n:44,hf:"ארבעים וארבע",tf:"арбаим вэ-арба",hm:"ארבעים וארבעה",tm:"арбаим вэ-арбаа"},
+  {n:45,hf:"ארבעים וחמש",tf:"арбаим вэ-хамеш",hm:"ארבעים וחמישה",tm:"арбаим вэ-хамиша"},
+  {n:46,hf:"ארבעים ושש",tf:"арбаим вэ-шеш",hm:"ארבעים ושישה",tm:"арбаим вэ-шиша"},
+  {n:47,hf:"ארבעים ושבע",tf:"арбаим вэ-шева",hm:"ארבעים ושבעה",tm:"арбаим вэ-шива"},
+  {n:48,hf:"ארבעים ושמונה",tf:"арбаим вэ-шмонэ",hm:"ארבעים ושמונה",tm:"арбаим вэ-шмона"},
+  {n:49,hf:"ארבעים ותשע",tf:"арбаим вэ-тэша",hm:"ארבעים ותשעה",tm:"арбаим вэ-тиша"},
+  {n:50,hf:"חמישים",tf:"хамишим",hm:"חמישים",tm:"хамишим"},
+  {n:51,hf:"חמישים ואחת",tf:"хамишим вэ-ахат",hm:"חמישים ואחד",tm:"хамишим вэ-эхад"},
+  {n:52,hf:"חמישים ושתיים",tf:"хамишим вэ-штаим",hm:"חמישים ושניים",tm:"хамишим вэ-шнаим"},
+  {n:53,hf:"חמישים ושלוש",tf:"хамишим вэ-шалош",hm:"חמישים ושלושה",tm:"хамишим вэ-шлоша"},
+  {n:54,hf:"חמישים וארבע",tf:"хамишим вэ-арба",hm:"חמישים וארבעה",tm:"хамишим вэ-арбаа"},
+  {n:55,hf:"חמישים וחמש",tf:"хамишим вэ-хамеш",hm:"חמישים וחמישה",tm:"хамишим вэ-хамиша"},
+  {n:56,hf:"חמישים ושש",tf:"хамишим вэ-шеш",hm:"חמישים ושישה",tm:"хамишим вэ-шиша"},
+  {n:57,hf:"חמישים ושבע",tf:"хамишим вэ-шева",hm:"חמישים ושבעה",tm:"хамишим вэ-шива"},
+  {n:58,hf:"חמישים ושמונה",tf:"хамишим вэ-шмонэ",hm:"חמישים ושמונה",tm:"хамишим вэ-шмона"},
+  {n:59,hf:"חמישים ותשע",tf:"хамишим вэ-тэша",hm:"חמישים ותשעה",tm:"хамишим вэ-тиша"},
+  {n:60,hf:"שישים",tf:"шишим",hm:"שישים",tm:"шишим"},
+  {n:61,hf:"שישים ואחת",tf:"шишим вэ-ахат",hm:"שישים ואחד",tm:"шишим вэ-эхад"},
+  {n:62,hf:"שישים ושתיים",tf:"шишим вэ-штаим",hm:"שישים ושניים",tm:"шишим вэ-шнаим"},
+  {n:63,hf:"שישים ושלוש",tf:"шишим вэ-шалош",hm:"שישים ושלושה",tm:"шишим вэ-шлоша"},
+  {n:64,hf:"שישים וארבע",tf:"шишим вэ-арба",hm:"שישים וארבעה",tm:"шишим вэ-арбаа"},
+  {n:65,hf:"שישים וחמש",tf:"шишим вэ-хамеш",hm:"שישים וחמישה",tm:"шишим вэ-хамиша"},
+  {n:66,hf:"שישים ושש",tf:"шишим вэ-шеш",hm:"שישים ושישה",tm:"шишим вэ-шиша"},
+  {n:67,hf:"שישים ושבע",tf:"шишим вэ-шева",hm:"שישים ושבעה",tm:"шишим вэ-шива"},
+  {n:68,hf:"שישים ושמונה",tf:"шишим вэ-шмонэ",hm:"שישים ושמונה",tm:"шишим вэ-шмона"},
+  {n:69,hf:"שישים ותשע",tf:"шишим вэ-тэша",hm:"שישים ותשעה",tm:"шишим вэ-тиша"},
+  {n:70,hf:"שבעים",tf:"шивим",hm:"שבעים",tm:"шивим"},
+  {n:71,hf:"שבעים ואחת",tf:"шивим вэ-ахат",hm:"שבעים ואחד",tm:"шивим вэ-эхад"},
+  {n:72,hf:"שבעים ושתיים",tf:"шивим вэ-штаим",hm:"שבעים ושניים",tm:"шивим вэ-шнаим"},
+  {n:73,hf:"שבעים ושלוש",tf:"шивим вэ-шалош",hm:"שבעים ושלושה",tm:"шивим вэ-шлоша"},
+  {n:74,hf:"שבעים וארבע",tf:"шивим вэ-арба",hm:"שבעים וארבעה",tm:"шивим вэ-арбаа"},
+  {n:75,hf:"שבעים וחמש",tf:"шивим вэ-хамеш",hm:"שבעים וחמישה",tm:"шивим вэ-хамиша"},
+  {n:76,hf:"שבעים ושש",tf:"шивим вэ-шеш",hm:"שבעים ושישה",tm:"шивим вэ-шиша"},
+  {n:77,hf:"שבעים ושבע",tf:"шивим вэ-шева",hm:"שבעים ושבעה",tm:"шивим вэ-шива"},
+  {n:78,hf:"שבעים ושמונה",tf:"шивим вэ-шмонэ",hm:"שבעים ושמונה",tm:"шивим вэ-шмона"},
+  {n:79,hf:"שבעים ותשע",tf:"шивим вэ-тэша",hm:"שבעים ותשעה",tm:"шивим вэ-тиша"},
+  {n:80,hf:"שמונים",tf:"шмоним",hm:"שמונים",tm:"шмоним"},
+  {n:81,hf:"שמונים ואחת",tf:"шмоним вэ-ахат",hm:"שמונים ואחד",tm:"шмоним вэ-эхад"},
+  {n:82,hf:"שמונים ושתיים",tf:"шмоним вэ-штаим",hm:"שמונים ושניים",tm:"шмоним вэ-шнаим"},
+  {n:83,hf:"שמונים ושלוש",tf:"шмоним вэ-шалош",hm:"שמונים ושלושה",tm:"шмоним вэ-шлоша"},
+  {n:84,hf:"שמונים וארבע",tf:"шмоним вэ-арба",hm:"שמונים וארבעה",tm:"шмоним вэ-арбаа"},
+  {n:85,hf:"שמונים וחמש",tf:"шмоним вэ-хамеш",hm:"שמונים וחמישה",tm:"шмоним вэ-хамиша"},
+  {n:86,hf:"שמונים ושש",tf:"шмоним вэ-шеш",hm:"שמונים ושישה",tm:"шмоним вэ-шиша"},
+  {n:87,hf:"שמונים ושבע",tf:"шмоним вэ-шева",hm:"שמונים ושבעה",tm:"шмоним вэ-шива"},
+  {n:88,hf:"שמונים ושמונה",tf:"шмоним вэ-шмонэ",hm:"שמונים ושמונה",tm:"шмоним вэ-шмона"},
+  {n:89,hf:"שמונים ותשע",tf:"шмоним вэ-тэша",hm:"שמונים ותשעה",tm:"шмоним вэ-тиша"},
+  {n:90,hf:"תשעים",tf:"тишим",hm:"תשעים",tm:"тишим"},
+  {n:91,hf:"תשעים ואחת",tf:"тишим вэ-ахат",hm:"תשעים ואחד",tm:"тишим вэ-эхад"},
+  {n:92,hf:"תשעים ושתיים",tf:"тишим вэ-штаим",hm:"תשעים ושניים",tm:"тишим вэ-шнаим"},
+  {n:93,hf:"תשעים ושלוש",tf:"тишим вэ-шалош",hm:"תשעים ושלושה",tm:"тишим вэ-шлоша"},
+  {n:94,hf:"תשעים וארבע",tf:"тишим вэ-арба",hm:"תשעים וארבעה",tm:"тишим вэ-арбаа"},
+  {n:95,hf:"תשעים וחמש",tf:"тишим вэ-хамеш",hm:"תשעים וחמישה",tm:"тишим вэ-хамиша"},
+  {n:96,hf:"תשעים ושש",tf:"тишим вэ-шеш",hm:"תשעים ושישה",tm:"тишим вэ-шиша"},
+  {n:97,hf:"תשעים ושבע",tf:"тишим вэ-шева",hm:"תשעים ושבעה",tm:"тишим вэ-шива"},
+  {n:98,hf:"תשעים ושמונה",tf:"тишим вэ-шмонэ",hm:"תשעים ושמונה",tm:"тишим вэ-шмона"},
+  {n:99,hf:"תשעים ותשע",tf:"тишим вэ-тэша",hm:"תשעים ותשעה",tm:"тишим вэ-тиша"},
+  {n:100,hf:"מאה",tf:"меа",hm:"מאה",tm:"меа"},
+];
+
 const THEME_CATS = ["Все","Квартира","Город","Предлоги","Аренда","Прилагательные"];
 
 /* ===== состояние ===== */
@@ -1383,23 +1670,57 @@ function updateStats(){$("stViewed").textContent=viewed.size;$("stScore").textCo
 function refresh(){ if(mode==="flash")render(); else if(mode==="quiz")newQuestion(); else renderList(); }
 
 function showView(){
-  const study = section!=="search";
+  const study = (section==="theme"||section==="lessons");
   $("studyBar").style.display = study?"":"none";
   $("flashView").style.display = (study&&mode==="flash")?"":"none";
   $("quizView").style.display  = (study&&mode==="quiz")?"block":"none";
   $("listView").style.display  = (study&&mode==="list")?"block":"none";
   $("searchView").style.display= (section==="search")?"block":"none";
+  $("numbersView").style.display= (section==="numbers")?"block":"none";
+  $("excView").style.display= (section==="exc")?"block":"none";
   $("themeCtrl").style.display = section==="theme"?"":"none";
   $("lessonCtrl").style.display= section==="lessons"?"":"none";
   $("searchCtrl").style.display= section==="search"?"":"none";
+}
+function renderExc(){
+  const box=$("excBox"); if(box.dataset.done) return; box.innerHTML="";
+  EXC.forEach(w=>{
+    const card=document.createElement("div"); card.className="exc-card";
+    card.innerHTML=
+      `<div class="exc-ru">${w.ru}</div>`+
+      `<div class="exc-line">`+
+        `<div class="exc-form"><span class="lbl">ед.ч.</span><span class="he" dir="rtl">${w.hs}</span><span class="t">${w.ts}</span></div>`+
+        `<div class="exc-arrow">→</div>`+
+        `<div class="exc-form pl"><span class="lbl">мн.ч.</span><span class="he" dir="rtl">${w.hp}</span><span class="t">${w.tp}</span></div>`+
+      `</div>`+
+      `<div class="exc-note">${w.note}</div>`;
+    box.appendChild(card);
+  });
+  box.dataset.done="1";
+}
+function renderNumbers(){
+  const box=$("numbersBox"); if(box.dataset.done) return; box.innerHTML="";
+  NUMBERS.forEach(x=>{
+    const row=document.createElement("div");
+    row.className="num-row"+(x.n%10===0||x.n<=10||x.n===100?" num-round":"");
+    row.innerHTML=`<div class="num-n">${x.n}</div>`+
+      `<div class="num-cell"><span class="h" dir="rtl">${x.hf}</span><span class="t">${x.tf}</span></div>`+
+      `<div class="num-cell"><span class="h" dir="rtl">${x.hm}</span><span class="t">${x.tm}</span></div>`;
+    box.appendChild(row);
+  });
+  box.dataset.done="1";
 }
 function setSection(s){
   section=s;
   $("secTheme").setAttribute("aria-pressed",s==="theme");
   $("secLessons").setAttribute("aria-pressed",s==="lessons");
   $("secSearch").setAttribute("aria-pressed",s==="search");
+  $("secNumbers").setAttribute("aria-pressed",s==="numbers");
+  $("secExc").setAttribute("aria-pressed",s==="exc");
   showView();
   if(s==="search"){ $("searchCount").textContent=""; renderSearch(); setTimeout(()=>$("searchInput").focus(),0); }
+  else if(s==="numbers"){ renderNumbers(); }
+  else if(s==="exc"){ renderExc(); }
   else { buildDeck(); refresh(); }
 }
 function setMode(m){
@@ -1419,6 +1740,8 @@ function toggleDir(){
 $("secTheme").onclick=()=>setSection("theme");
 $("secLessons").onclick=()=>setSection("lessons");
 $("secSearch").onclick=()=>setSection("search");
+$("secNumbers").onclick=()=>setSection("numbers");
+$("secExc").onclick=()=>setSection("exc");
 $("lessonSel").onchange=e=>{lessonSel=e.target.value;buildDeck();refresh();};
 $("lessonCat").onchange=e=>{lessonCat=e.target.value;buildDeck();refresh();};
 $("searchInput").oninput=e=>{query=e.target.value;renderSearch();};
